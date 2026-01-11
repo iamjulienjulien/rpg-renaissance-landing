@@ -1,0 +1,30 @@
+/* src/styles/globals.css */
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(
+      1200px 700px at 20% 0%,
+      rgba(168, 85, 247, 0.18),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 600px at 90% 20%,
+      rgba(59, 130, 246, 0.16),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 700px at 60% 110%,
+      rgba(245, 158, 11, 0.12),
+      transparent 55%
+    ),
+    #05060a;
+}
