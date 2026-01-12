@@ -15,6 +15,10 @@ function safeTrim(x: unknown): string {
     return typeof x === "string" ? x.trim() : "";
 }
 
+function json(body: any, status = 200) {
+    return NextResponse.json(body, { status });
+}
+
 /* ============================================================================
 GET /api/subscribe/confirm?token=...
 ============================================================================ */
@@ -23,33 +27,38 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const token = safeTrim(url.searchParams.get("token"));
 
-    const siteUrl = safeTrim(process.env.NEXT_PUBLIC_SITE_URL) || url.origin;
-
-    const redirectOk = NextResponse.redirect(new URL("/?confirmed=1", siteUrl), 302);
-    const redirectFail = NextResponse.redirect(new URL("/?confirmed=0", siteUrl), 302);
-
-    if (!token) return redirectFail;
+    if (!token) {
+        return json({ ok: false, reason: "missing_token" }, 400);
+    }
 
     const token_hash = sha256(token);
     const supabase = supabaseAdmin();
 
     try {
-        // 1) Find token row
+        // 1) Lookup token
         const { data: tok, error: tokErr } = await supabase
             .from("newsletter_optin_tokens")
             .select("id,subscriber_id,expires_at,confirmed_at,revoked_at")
             .eq("token_hash", token_hash)
             .maybeSingle();
 
-        if (tokErr || !tok?.id) return redirectFail;
+        if (tokErr || !tok) {
+            return json({ ok: false, reason: "invalid" }, 404);
+        }
 
-        if (tok.revoked_at) return redirectFail;
+        if (tok.revoked_at) {
+            return json({ ok: false, reason: "revoked" }, 400);
+        }
 
-        // Déjà confirmé: OK (idempotent)
-        if (tok.confirmed_at) return redirectOk;
+        // Déjà confirmé → idempotent
+        if (tok.confirmed_at) {
+            return json({ ok: true, already: true }, 200);
+        }
 
         const expiresAt = tok.expires_at ? new Date(tok.expires_at).getTime() : 0;
-        if (!expiresAt || Date.now() > expiresAt) return redirectFail;
+        if (!expiresAt || Date.now() > expiresAt) {
+            return json({ ok: false, reason: "expired" }, 400);
+        }
 
         const nowIso = new Date().toISOString();
 
@@ -59,9 +68,11 @@ export async function GET(req: Request) {
             .update({ confirmed_at: nowIso })
             .eq("id", tok.id);
 
-        if (markErr) return redirectFail;
+        if (markErr) {
+            return json({ ok: false, reason: "token_update_failed" }, 500);
+        }
 
-        // 3) Update subscriber status -> confirmed
+        // 3) Update subscriber
         const { error: subErr } = await supabase
             .from("newsletter_subscribers")
             .update({
@@ -70,10 +81,11 @@ export async function GET(req: Request) {
             })
             .eq("id", tok.subscriber_id);
 
-        if (subErr) return redirectFail;
+        if (subErr) {
+            return json({ ok: false, reason: "subscriber_update_failed" }, 500);
+        }
 
-        // 4) Log RGPD event: confirm
-        // ✅ event_at default now() donc pas besoin de le passer
+        // 4) RGPD event
         await supabase.from("newsletter_consent_events").insert({
             subscriber_id: tok.subscriber_id,
             event_type: "confirm",
@@ -82,8 +94,8 @@ export async function GET(req: Request) {
             privacy_policy_version: "2026-01-11",
         });
 
-        return redirectOk;
-    } catch {
-        return redirectFail;
+        return json({ ok: true }, 200);
+    } catch (e) {
+        return json({ ok: false, reason: "server_error" }, 500);
     }
 }

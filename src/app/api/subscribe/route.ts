@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { subscribeSchema } from "@/lib/subscribeSchema";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import crypto from "node:crypto";
+import { Resend } from "resend";
 
 /* ============================================================================
 HELPERS
@@ -74,6 +75,19 @@ function getLandingContext(headers: Headers) {
     return { userAgent, referrer, landingPath, origin, locale, utm };
 }
 
+function buildSiteUrl(origin: string | null) {
+    const env = safeTrim(process.env.NEXT_PUBLIC_SITE_URL);
+    const candidate = env || safeTrim(origin) || "http://localhost:3000";
+
+    try {
+        // valide et normalise
+        const u = new URL(candidate);
+        return u.toString().replace(/\/$/, "");
+    } catch {
+        return "http://localhost:3000";
+    }
+}
+
 /* ============================================================================
 EMAIL (Resend)
 ============================================================================ */
@@ -82,8 +96,6 @@ async function sendDoubleOptInEmail(args: { email: string; confirmUrl: string })
     const apiKey = safeTrim(process.env.RESEND_API_KEY);
     if (!apiKey) throw new Error("Missing env: RESEND_API_KEY");
 
-    // ⚠️ Mets une adresse FROM validée chez Resend
-    // ex: "RPG Renaissance <hello@rpg-renaissance.fr>"
     const from =
         safeTrim(process.env.RESEND_FROM_EMAIL) || "RPG Renaissance <onboarding@resend.dev>";
 
@@ -120,25 +132,18 @@ async function sendDoubleOptInEmail(args: { email: string; confirmUrl: string })
 </div>
 `.trim();
 
-    const r = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            from,
-            to: args.email,
-            subject,
-            html,
-        }),
+    const resend = new Resend(apiKey);
+
+    const { error } = await resend.emails.send({
+        from,
+        to: args.email,
+        subject,
+        html,
     });
 
-    const j = await r.json().catch(() => null);
-
-    if (!r.ok) {
-        // Resend renvoie généralement { message, name } en cas d’erreur
-        throw new Error(j?.message || "Resend: failed to send email");
+    if (error) {
+        // error.message existe généralement, mais on reste safe
+        throw new Error(error.message || "Resend: failed to send email");
     }
 }
 
@@ -174,10 +179,7 @@ export async function POST(req: Request) {
     const ip_hash = hashIp(rawIp, ipSalt);
 
     const { userAgent, referrer, landingPath, origin, locale, utm } = getLandingContext(headers);
-
-    // Domaine utilisé pour le lien de confirmation:
-    const siteUrl =
-        safeTrim(process.env.NEXT_PUBLIC_SITE_URL) || safeTrim(origin) || "http://localhost:3000";
+    const siteUrl = buildSiteUrl(origin);
 
     const supabase = supabaseAdmin();
 
@@ -191,12 +193,12 @@ export async function POST(req: Request) {
 
         if (existingErr) return jsonError("Unable to save subscription", 500);
 
-        // Si déjà confirmé/subscribed: OK sans renvoyer d’email (évite spam + fuite)
+        // Déjà confirmé => OK silencieux (anti-spam / anti-leak)
         if (existing?.id && (existing.status === "confirmed" || existing.status === "subscribed")) {
             return NextResponse.json({ ok: true, already: true }, { status: 200 });
         }
 
-        // Si "complained" ou "bounced": on répond OK mais on ne renvoie rien (anti abuse)
+        // bounced/complained => OK silencieux
         if (existing?.id && (existing.status === "complained" || existing.status === "bounced")) {
             return NextResponse.json({ ok: true }, { status: 200 });
         }
@@ -222,14 +224,11 @@ export async function POST(req: Request) {
                     user_agent: userAgent,
                     referrer,
                     landing_path: landingPath,
-
                     ...utm,
 
                     ip_hash,
 
-                    // bonus double opt-in tracking
                     last_optin_sent_at: nowIso,
-                    // confirmed_at: null (on ne touche pas, laissé null)
                 },
                 { onConflict: "email" }
             )
@@ -243,7 +242,6 @@ export async function POST(req: Request) {
         // 2) Create a double opt-in token (store ONLY hash)
         const rawToken = makeToken(32);
         const token_hash = sha256(rawToken);
-
         const expiresAtIso = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
 
         // Invalider anciens tokens actifs (best effort)
@@ -270,8 +268,7 @@ export async function POST(req: Request) {
 
         if (tokErr) return jsonError("Unable to create confirmation token", 500);
 
-        // 3) Log RGPD event: demande d’inscription (avant confirmation)
-        // ✅ ta table utilise event_at (default now()), donc on n’envoie pas created_at.
+        // 3) Log RGPD event
         await supabase.from("newsletter_consent_events").insert({
             subscriber_id: subscriber.id,
             event_type: "subscribe_request",
@@ -285,10 +282,18 @@ export async function POST(req: Request) {
             user_agent: userAgent,
         });
 
-        // 4) Send email
-        const confirmUrl = `${siteUrl.replace(/\/$/, "")}/api/subscribe/confirm?token=${rawToken}`;
+        // 4) Send email (Resend)
+        const confirmUrl = `${siteUrl}/api/subscribe/confirm?token=${rawToken}`;
 
-        await sendDoubleOptInEmail({ email, confirmUrl });
+        try {
+            await sendDoubleOptInEmail({ email, confirmUrl });
+        } catch (e) {
+            // Choix produit:
+            // A) retourner 500 pour que le front affiche "réessaie"
+            // B) retourner 200 pour ne pas aider les abuseurs (email enumeration)
+            // Ici je garde 500 car tu es en phase build, c’est plus simple à débug.
+            return jsonError(e instanceof Error ? e.message : "Email send failed", 500);
+        }
 
         return NextResponse.json({ ok: true }, { status: 200 });
     } catch {
