@@ -1,6 +1,6 @@
 // src/app/subscribe/confirm/page.tsx
 import type { Metadata } from "next";
-import { useEffect } from "react";
+import PlausibleEvent from "./plausible-event";
 
 export const metadata: Metadata = {
     title: "Confirmation",
@@ -14,7 +14,6 @@ type SearchParamsValue = string | string[] | undefined;
 type SearchParamsShape = Record<string, SearchParamsValue>;
 
 type Props = {
-    // Next peut te passer soit un objet, soit une Promise (selon version / config)
     searchParams?: SearchParamsShape | Promise<SearchParamsShape>;
 };
 
@@ -25,6 +24,7 @@ function pickFirst(v: SearchParamsValue): string | null {
 }
 
 async function confirmOptIn(token: string) {
+    // ✅ côté server: utilise une URL “site” stable (NEXT_PUBLIC_SITE_URL)
     const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     const res = await fetch(`${base}/api/subscribe/confirm?token=${encodeURIComponent(token)}`, {
@@ -42,8 +42,6 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
             : (searchParams as SearchParamsShape | undefined);
 
     const token = pickFirst(sp?.token)?.trim() ?? "";
-
-    console.log("t", token);
 
     if (!token) {
         return (
@@ -78,12 +76,15 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
     if (result?.already) {
         return (
             <ConfirmLayout>
+                {/* (optionnel) event aussi si tu veux compter “déjà confirmé” */}
+                <PlausibleEvent name="subscribe_confirmed_already" />
                 <Title>✅ Déjà confirmé</Title>
                 <Text>
                     Ta quête est déjà active.
                     <br />
                     Tu es bien inscrit à RPG Renaissance.
                 </Text>
+                <PrimaryLink href="/">🏕️ Retour au camp de base</PrimaryLink>
             </ConfirmLayout>
         );
     }
@@ -102,14 +103,11 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
         );
     }
 
-    useEffect(() => {
-        if (window.plausible) {
-            window.plausible("subscribe_confirmed");
-        }
-    }, []);
-
     return (
         <ConfirmLayout>
+            {/* ✅ event uniquement quand OK */}
+            <PlausibleEvent name="subscribe_confirmed" />
+
             <Title>✨ Quête confirmée</Title>
             <Text>
                 Ton inscription à <b>RPG Renaissance</b> est validée.

@@ -6,13 +6,13 @@ export default function Roadmap() {
     const steps = [
         {
             title: "Prologue",
-            desc: "Landing + liste d’attente + premiers tests.",
+            desc: "Ouverture de la liste d’attente et premières démos (à venir).",
             badge: "✅ En cours",
         },
         {
             title: "Alpha fermée",
-            desc: "Système de quêtes + progression + journal.",
-            badge: "⏳ Bientôt",
+            desc: "Démos du système de quêtes, avec progression et journal.",
+            badge: "⏳ Cet hiver",
         },
         // {
         //   title: "Avatars",
@@ -21,7 +21,7 @@ export default function Roadmap() {
         // },
         {
             title: "Beta",
-            desc: "Boucle complète: quêtes, récompenses, UI polish.",
+            desc: "Première aventure complète : chapitres, quêtes, récompenses, narration.",
             badge: "🛠️ Printemps 2026",
         },
         {
