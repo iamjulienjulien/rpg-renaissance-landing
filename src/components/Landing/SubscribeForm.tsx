@@ -45,6 +45,9 @@ export default function SubscribeForm() {
                 return;
             }
 
+            if (window.plausible) {
+                window.plausible("subscribe_submit");
+            }
             setOk("check-email");
             setEmail("");
         } catch {

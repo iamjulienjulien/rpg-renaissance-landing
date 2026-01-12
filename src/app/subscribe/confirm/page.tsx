@@ -1,5 +1,6 @@
 // src/app/subscribe/confirm/page.tsx
 import type { Metadata } from "next";
+import { useEffect } from "react";
 
 export const metadata: Metadata = {
     title: "Confirmation",
@@ -100,6 +101,12 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
             </ConfirmLayout>
         );
     }
+
+    useEffect(() => {
+        if (window.plausible) {
+            window.plausible("subscribe_confirmed");
+        }
+    }, []);
 
     return (
         <ConfirmLayout>
