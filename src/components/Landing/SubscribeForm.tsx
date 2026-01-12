@@ -3,6 +3,7 @@
 
 import React, { useMemo, useState } from "react";
 import { subscribeSchema } from "@/lib/subscribeSchema";
+import { track } from "@/helpers/plausible";
 
 function cn(...classes: Array<string | false | null | undefined>) {
     return classes.filter(Boolean).join(" ");
@@ -44,10 +45,7 @@ export default function SubscribeForm() {
                 setErr((j?.error as string) || "Impossible de s’inscrire");
                 return;
             }
-
-            if (window.plausible) {
-                window.plausible("subscribe_submit");
-            }
+            track("subscribe_submit");
             setOk("check-email");
             setEmail("");
         } catch {
