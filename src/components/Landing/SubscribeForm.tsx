@@ -75,7 +75,7 @@ export default function SubscribeForm() {
         <div className="rounded-2xl bg-black/35 ring-1 ring-white/10 p-5">
             <div className="flex items-start justify-between gap-3">
                 <div>
-                    <div className="text-sm font-semibold text-white/90">Rester informé</div>
+                    <div className="text-sm font-semibold text-white/90">Entrer dans la liste</div>
                     <div className="mt-1 text-xs text-white/60">
                         News rares, utiles, et un peu épiques. 📨
                     </div>
@@ -98,7 +98,9 @@ export default function SubscribeForm() {
                         "focus:ring-2 focus:ring-white/25"
                     )}
                 />
-
+                <p className="mt-1 text-xs text-white/50 leading-relaxed max-w-xl">
+                    Tu recevras une invitation quand un nouveau chapitre s’ouvre.
+                </p>
                 <label className="flex items-center gap-2 text-xs text-white/60">
                     <input
                         type="checkbox"

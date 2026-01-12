@@ -39,7 +39,7 @@ export default function Gameplay() {
             <div className="flex items-end justify-between gap-4">
                 <div>
                     <div className="text-xs tracking-[0.22em] text-white/55 uppercase">
-                        Boucle de jeu
+                        La Boucle de jeu
                     </div>
                     <h2 className="mt-2 text-2xl sm:text-3xl font-bold">
                         La progression, version RPG
@@ -47,6 +47,9 @@ export default function Gameplay() {
                     <p className="mt-3 text-white/70 max-w-2xl">
                         Pas de blabla. Une boucle simple, répétable, qui transforme tes journées en
                         montée en puissance.
+                    </p>
+                    <p className="mt-5 text-sm text-white/50 leading-relaxed max-w-xl">
+                        Chaque journée devient une petite scène de jeu.
                     </p>
                 </div>
             </div>

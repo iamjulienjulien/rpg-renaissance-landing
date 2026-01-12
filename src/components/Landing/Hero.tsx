@@ -20,11 +20,13 @@ export default function Hero() {
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-2xl bg-white/5 ring-1 ring-white/10 grid place-items-center">
-                            <span className="text-lg">🜂</span>
+                            <span className="text-lg">
+                                <img src="favicon-32x32.png" alt="RPG Renaissance" />
+                            </span>
                         </div>
                         <div className="text-sm text-white/70">
                             <div className="font-semibold text-white/90">RPG Renaissance</div>
-                            <div className="text-xs">rpg-renaissance.fr • rpg-renaissance.com</div>
+                            <div className="text-xs">rpg-renaissance.com</div>
                         </div>
                     </div>
 
@@ -39,7 +41,7 @@ export default function Hero() {
                     </a>
                 </div>
 
-                <div className="mt-12 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+                <div className="mt-12 grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
                     <div>
                         <motion.div
                             initial={{ opacity: 0, y: 12 }}
@@ -70,14 +72,24 @@ export default function Hero() {
                             gagnes de l’élan, tu débloques des pouvoirs… et tu avances dans la vraie
                             vie. 🧠✨
                         </motion.p>
+                        <motion.p
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.65, delay: 0.1 }}
+                            className="mt-5 text-sm text-white/50 leading-relaxed max-w-xl"
+                        >
+                            Un jeu narratif pour transformer ta progression personnelle en aventure
+                            concrète.
+                        </motion.p>
 
                         <div className="mt-7 flex flex-wrap gap-2">
                             {[
-                                "🎭 Archétypes & vibes",
+                                "🌍 Une aventure à vivre",
+                                "🧭 Un voyage guidé, pas imposé",
                                 "📜 Quêtes du quotidien",
-                                "🧩 Inventaires & rituels",
-                                "🏆 Renommée & badges",
-                                "🧙 Avatars fantasy (toi, en épique)",
+                                "🔮 Rituels simples, impact réel",
+                                "🎖️ Des preuves de chemin parcouru",
+                                "🔥 Te voir autrement",
                             ].map((x) => (
                                 <span
                                     key={x}
@@ -101,12 +113,12 @@ export default function Hero() {
                                 className="inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold
                            bg-white/10 ring-1 ring-white/15 hover:bg-white/15 transition"
                             >
-                                🧩 Découvrir le concept
+                                🧩 Comment ça fonctionne
                             </a>
                         </div>
 
                         <div className="mt-6 text-xs text-white/50">
-                            Pas de spam. Juste des nouvelles quand un nouveau chapitre s’ouvre.
+                            Pas de spam. Juste un signal quand ton aventure peut commencer.
                         </div>
                     </div>
 
@@ -114,29 +126,20 @@ export default function Hero() {
                         initial={{ opacity: 0, scale: 0.98, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.12 }}
-                        className="relative"
+                        className="relative flex flex-col justify-between h-full"
                     >
-                        {/* <div className="rounded-3xl bg-black/30 ring-1 ring-white/10 p-5">
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <div className="text-sm font-semibold text-white/90">
-                                        Accès anticipé
-                                    </div>
-                                    <div className="mt-1 text-xs text-white/60">
-                                        Reçois l’invitation quand l’alpha ouvre ses portes. 🗝️
-                                    </div>
-                                </div>
-                                <div className="text-xs rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-white/70">
-                                    Early
-                                </div>
-                            </div> */}
-
-                        <div id="subscribe" className="">
-                            <SubscribeForm />
+                        <div className="mt-15">
+                            <img
+                                src="assets/logos/logo_renaissance_classic.png"
+                                alt="RPG Renaissance"
+                                className="m-auto"
+                            />
                         </div>
-                        {/* </div> */}
 
-                        <div className="pointer-events-none absolute -inset-4 rounded-4xl ring-1 ring-white/10 blur-[1px]" />
+                        <div id="subscribe" className="relative">
+                            <SubscribeForm />
+                            <div className="pointer-events-none absolute -inset-4 rounded-4xl ring-1 ring-white/10 blur-[1px]" />
+                        </div>
                     </motion.div>
                 </div>
             </div>
