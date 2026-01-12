@@ -1,73 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 512 512"
      version="1.2"
-     baseProfile="tiny">
+     baseProfile="tiny-ps"
+     viewBox="0 0 512 512">
 
-  <!-- STAR (flat) -->
-  <path fill="#C9A24D" d="
-    M256 56
-    L274 126
-    L344 144
-    L274 162
-    L256 232
-    L238 162
-    L168 144
-    L238 126
-    Z
-  "/>
+  <title>RPG Renaissance - Crown</title>
 
-  <!-- CROWN TOP (flat) -->
-  <path fill="#C9A24D" d="
-    M112 214
-    L166 276
-    L214 232
-    L256 314
-    L298 232
-    L346 276
-    L400 214
+  <!-- Couleur or (flat) -->
+  <g fill="#C9A24D">
 
-    C410 271 410 302 410 328
-    C410 356 388 378 360 378
-    L152 378
-    C124 378 102 356 102 328
-    C102 302 102 271 112 214
-    Z
-  "/>
+    <!-- Star -->
+    <path d="M256 56 L274 126 L344 144 L274 162 L256 232 L238 162 L168 144 L238 126 Z"/>
 
-  <!-- SIDE ORBS -->
-  <path fill="#C9A24D" d="M124 214 A22 22 0 1 0 123.9 214 Z"/>
-  <path fill="#C9A24D" d="M388 214 A22 22 0 1 0 387.9 214 Z"/>
+    <!-- Crown body -->
+    <path d="
+      M112 214
+      L166 276
+      L214 232
+      L256 314
+      L298 232
+      L346 276
+      L400 214
+      C410 271 410 302 410 328
+      C410 356 388 378 360 378
+      L152 378
+      C124 378 102 356 102 328
+      C102 302 102 271 112 214
+      Z
+    "/>
 
-  <!-- INNER CUT (simple negative space imitation) -->
-  <!-- NOTE: BIMI-friendly = no mask. We fake “holes” by drawing the background as transparent:
-       In pure SVG without masks, holes require compound paths.
-       Below is a compound path using evenodd fill-rule. -->
-  <path fill="#000000" fill-opacity="0" fill-rule="evenodd" d="
-    M0 0 H512 V512 H0 Z
-    M256 255
-    L278 308
-    L256 342
-    L234 308
-    Z
-    M212 270
-    L232 318
-    L212 346
-    L192 318
-    Z
-    M300 270
-    L320 318
-    L300 346
-    L280 318
-    Z
-  "/>
+    <!-- Side orbs -->
+    <path d="M124 214 A22 22 0 1 0 123.9 214 Z"/>
+    <path d="M388 214 A22 22 0 1 0 387.9 214 Z"/>
 
-  <!-- BASE RIM (flat) -->
-  <path fill="#C9A24D" d="
-    M144 392
-    C144 360 368 360 368 392
-    C368 424 144 424 144 392
-    Z
-  "/>
+    <!-- Base rim -->
+    <path d="M144 392 C144 360 368 360 368 392 C368 424 144 424 144 392 Z"/>
+  </g>
 
 </svg>
