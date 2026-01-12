@@ -116,7 +116,7 @@ export default function Hero() {
                         transition={{ duration: 0.7, delay: 0.12 }}
                         className="relative"
                     >
-                        <div className="rounded-3xl bg-black/30 ring-1 ring-white/10 p-5">
+                        {/* <div className="rounded-3xl bg-black/30 ring-1 ring-white/10 p-5">
                             <div className="flex items-start justify-between gap-3">
                                 <div>
                                     <div className="text-sm font-semibold text-white/90">
@@ -129,12 +129,12 @@ export default function Hero() {
                                 <div className="text-xs rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-white/70">
                                     Early
                                 </div>
-                            </div>
+                            </div> */}
 
-                            <div id="subscribe" className="mt-4">
-                                <SubscribeForm />
-                            </div>
+                        <div id="subscribe" className="">
+                            <SubscribeForm />
                         </div>
+                        {/* </div> */}
 
                         <div className="pointer-events-none absolute -inset-4 rounded-4xl ring-1 ring-white/10 blur-[1px]" />
                     </motion.div>

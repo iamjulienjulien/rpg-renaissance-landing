@@ -25,7 +25,7 @@ export default function Page() {
             <Hero />
             <Gameplay />
             <Features />
-            <PrologueDemo />
+            {/* <PrologueDemo /> */}
             <Roadmap />
             <Footer />
         </main>
