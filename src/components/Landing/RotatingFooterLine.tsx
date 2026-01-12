@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const FOOTER_LINES = [
     "Renaissance est un voyage, pas un bouton. (Même si on aime les boutons.)",
@@ -38,21 +38,45 @@ function shuffleArray<T>(arr: T[]) {
 export function RotatingFooterLine(props: RotatingFooterLineProps) {
     const { intervalMs = 6500, shuffle = false, startRandom = true, className } = props;
 
-    const lines = useMemo(() => {
-        const base = shuffle ? shuffleArray(FOOTER_LINES) : FOOTER_LINES;
-        return base.length ? base : [""]; // safety
-    }, [shuffle]);
+    // ✅ SSR-safe: première peinture stable (pas de random / pas de shuffle)
+    const [mounted, setMounted] = useState(false);
 
-    const [idx, setIdx] = useState(() => {
-        if (!startRandom) return 0;
-        return Math.floor(Math.random() * lines.length);
-    });
+    // ✅ On fige la liste réelle dans un state, initialisé de façon déterministe
+    const [lines, setLines] = useState<string[]>(() => (FOOTER_LINES.length ? FOOTER_LINES : [""]));
+
+    // ✅ Index déterministe au départ (0)
+    const [idx, setIdx] = useState(0);
     const [visible, setVisible] = useState(true);
 
+    // Monte côté client
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Après mount: on applique shuffle + startRandom (client-only)
+    useEffect(() => {
+        if (!mounted) return;
+
+        const base = FOOTER_LINES.length ? FOOTER_LINES : [""];
+        const nextLines = shuffle ? shuffleArray(base) : base;
+
+        setLines(nextLines);
+
+        if (startRandom && nextLines.length > 1) {
+            setIdx(Math.floor(Math.random() * nextLines.length));
+        } else {
+            setIdx(0);
+        }
+    }, [mounted, shuffle, startRandom]);
+
+    // Rotation
+    useEffect(() => {
+        if (!mounted) return;
         if (lines.length <= 1) return;
 
-        const fadeMs = 220; // léger, évite le côté “saccadé”
+        const fadeMs = 220;
+        const delay = Math.max(1500, intervalMs);
+
         const tick = () => {
             setVisible(false);
             window.setTimeout(() => {
@@ -61,9 +85,9 @@ export function RotatingFooterLine(props: RotatingFooterLineProps) {
             }, fadeMs);
         };
 
-        const t = window.setInterval(tick, Math.max(1500, intervalMs));
+        const t = window.setInterval(tick, delay);
         return () => window.clearInterval(t);
-    }, [intervalMs, lines.length]);
+    }, [mounted, intervalMs, lines.length]);
 
     const text = lines[idx] ?? "";
 
