@@ -41,6 +41,19 @@ async function updateResendContactUnsubscribed(args: {
     if (updated?.error) {
         throw new Error(updated.error.message || "Resend: failed to update contact");
     }
+
+    const contactId = args.resendContactId;
+    const segmentId = safeTrim(process.env.RESEND_SEGMENT_ID);
+    if (!segmentId) console.warn("[resend] Missing env: RESEND_SEGMENT_ID");
+
+    const removed = await resend.contacts.segments.remove({
+        contactId,
+        segmentId,
+    });
+
+    if (removed?.error) {
+        throw new Error(removed.error.message || "Resend: failed to remove contact from segment");
+    }
 }
 
 /* ============================================================================

@@ -117,16 +117,29 @@ async function upsertResendContact(args: {
     try {
         const created = await resend.contacts.create({
             email: args.email,
-            unsubscribed: false,
+            unsubscribed: true,
             properties,
         });
 
-        if (created?.data?.id) {
-            return created.data.id;
-        }
-
         if (created?.error) {
             throw new Error(created.error.message);
+        }
+
+        if (created?.data?.id) {
+            const contactId = created?.data?.id;
+
+            const segmentId = safeTrim(process.env.RESEND_SEGMENT_ID);
+            if (!segmentId) console.warn("[resend] Missing env: RESEND_SEGMENT_ID");
+
+            const added = await resend.contacts.segments.add({
+                contactId,
+                segmentId,
+            });
+            if (added?.error) {
+                throw new Error(added.error.message);
+            }
+
+            return created.data.id;
         }
 
         throw new Error("Resend: unexpected contacts.create response");
