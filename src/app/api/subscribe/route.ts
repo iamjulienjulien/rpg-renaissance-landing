@@ -88,6 +88,72 @@ function buildSiteUrl(origin: string | null) {
 }
 
 /* ============================================================================
+RESEND CONTACTS
+============================================================================ */
+
+async function upsertResendContact(args: {
+    email: string;
+    locale: string | null;
+    landingPath: string | null;
+    utm: Record<string, string | null>;
+}) {
+    const apiKey = safeTrim(process.env.RESEND_API_KEY);
+    if (!apiKey) throw new Error("Missing env: RESEND_API_KEY");
+
+    const resend = new Resend(apiKey);
+
+    // Custom properties Resend (clé/valeur simples)
+    const properties: Record<string, string> = {
+        status: "pending",
+    };
+
+    if (args.locale) properties.locale = args.locale;
+    if (args.landingPath) properties.landing_path = args.landingPath;
+
+    for (const [k, v] of Object.entries(args.utm)) {
+        if (v) properties[k] = v;
+    }
+
+    try {
+        const created = await resend.contacts.create({
+            email: args.email,
+            unsubscribed: false,
+            properties,
+        });
+
+        if (created?.data?.id) {
+            return created.data.id;
+        }
+
+        if (created?.error) {
+            throw new Error(created.error.message);
+        }
+
+        throw new Error("Resend: unexpected contacts.create response");
+    } catch (err: any) {
+        /**
+         * Cas important:
+         * Resend renvoie une erreur si le contact existe déjà.
+         * On NE FAIL PAS, on considère que le contact existe.
+         *
+         * Comme Resend ne permet pas toujours un retrieve by email,
+         * on adopte une stratégie simple:
+         * - on log
+         * - on retourne null
+         * - la DB reste source de vérité
+         */
+        const message = String(err?.message ?? "");
+
+        if (message.toLowerCase().includes("exist")) {
+            console.warn("[resend] contact already exists for", args.email);
+            return null;
+        }
+
+        throw err;
+    }
+}
+
+/* ============================================================================
 EMAIL (Resend) — double opt-in + List-Unsubscribe
 ============================================================================ */
 
@@ -284,6 +350,33 @@ export async function POST(req: Request) {
 
         if (upsertErr || !subscriber?.id) {
             return jsonError("Unable to save subscription", 500);
+        }
+
+        // 1bis) Create contact in Resend (CRM)
+        let resend_contact_id: string | null = null;
+
+        try {
+            resend_contact_id = await upsertResendContact({
+                email,
+                locale,
+                landingPath,
+                utm,
+            });
+        } catch (e) {
+            // Choix volontaire: on ne bloque PAS l’inscription
+            console.error("[resend] contact create failed", e);
+        }
+
+        // Stockage si on a un id
+        if (resend_contact_id) {
+            await supabase
+                .from("newsletter_subscribers")
+                .update({
+                    resend_contact_id,
+                    resend_contact_status: "pending",
+                    resend_contact_updated_at: nowIso,
+                })
+                .eq("id", subscriber.id);
         }
 
         // 2) Create double opt-in token (store ONLY hash)
