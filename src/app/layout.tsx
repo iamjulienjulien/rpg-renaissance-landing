@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import Script from "next/script";
 
 const siteName = "RPG Renaissance";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.rpg-renaissance.com";
@@ -91,6 +92,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                 {/* Contenu au-dessus */}
                 <div className="relative z-10 min-h-screen">{children}</div>
+                <Script
+                    src="https://plausible.io/js/script.js"
+                    data-domain="rpg-renaissance.com"
+                    strategy="afterInteractive"
+                />
             </body>
         </html>
     );
