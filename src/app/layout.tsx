@@ -72,6 +72,11 @@ export const metadata: Metadata = {
         images: ["/og.jpg"],
         creator: "@iamjulienjulien",
     },
+
+    robots: {
+        index: true,
+        follow: true,
+    },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

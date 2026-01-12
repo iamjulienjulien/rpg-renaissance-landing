@@ -1,4 +1,13 @@
 // src/app/subscribe/confirm/page.tsx
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Confirmation",
+    robots: {
+        index: false,
+        follow: true,
+    },
+};
 
 type SearchParamsValue = string | string[] | undefined;
 type SearchParamsShape = Record<string, SearchParamsValue>;

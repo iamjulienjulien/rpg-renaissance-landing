@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /subscribe/confirm
+Disallow: /unsubscribe
+
+Sitemap: https://www.rpg-renaissance.com/sitemap.xml

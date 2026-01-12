@@ -1,7 +1,16 @@
 // src/app/unsubscribe/page.tsx
 import UnsubscribeClient from "./unsubscribe-client";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+    title: "Désinscription",
+    robots: {
+        index: false,
+        follow: true,
+    },
+};
 
 type SearchParamsValue = string | string[] | undefined;
 type SearchParamsShape = Record<string, SearchParamsValue>;
