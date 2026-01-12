@@ -83,6 +83,24 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="fr" className="overflow-hidden">
+            <head>
+                {/* 1) Stub: permet de queue les events AVANT chargement du script */}
+                <Script id="plausible-stub" strategy="beforeInteractive">
+                    {`
+                      window.plausible = window.plausible || function() {
+                        (window.plausible.q = window.plausible.q || []).push(arguments)
+                      }
+                    `}
+                </Script>
+
+                {/* 2) Script Plausible */}
+                <Script
+                    strategy="afterInteractive"
+                    defer
+                    data-domain="rpg-renaissance.com"
+                    src="https://plausible.io/js/script.js"
+                />
+            </head>
             <body className="min-h-screen text-white bg-black overflow-x-hidden">
                 {/* Background global (ne dépend d'aucune section) */}
                 <div className="fixed inset-0 -z-10">
@@ -92,11 +110,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                 {/* Contenu au-dessus */}
                 <div className="relative z-10 min-h-screen">{children}</div>
-                <Script
-                    src="https://plausible.io/js/script.js"
-                    data-domain="rpg-renaissance.com"
-                    strategy="afterInteractive"
-                />
             </body>
         </html>
     );
