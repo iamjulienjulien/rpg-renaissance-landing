@@ -1,27 +1,39 @@
 // src/app/subscribe/confirm/page.tsx
-import { redirect } from "next/navigation";
+
+type SearchParamsValue = string | string[] | undefined;
+type SearchParamsShape = Record<string, SearchParamsValue>;
 
 type Props = {
-    searchParams?: {
-        token?: string;
-    };
+    // Next peut te passer soit un objet, soit une Promise (selon version / config)
+    searchParams?: SearchParamsShape | Promise<SearchParamsShape>;
 };
 
+function pickFirst(v: SearchParamsValue): string | null {
+    if (typeof v === "string") return v;
+    if (Array.isArray(v)) return v[0] ?? null;
+    return null;
+}
+
 async function confirmOptIn(token: string) {
-    const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SITE_URL}/api/subscribe/confirm?token=${token}`,
-        { cache: "no-store" }
-    );
+    const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-    if (!res.ok) {
-        return { ok: false };
-    }
+    const res = await fetch(`${base}/api/subscribe/confirm?token=${encodeURIComponent(token)}`, {
+        cache: "no-store",
+    });
 
+    if (!res.ok) return { ok: false };
     return res.json();
 }
 
 export default async function SubscribeConfirmPage({ searchParams }: Props) {
-    const token = searchParams?.token?.trim();
+    const sp =
+        searchParams && typeof (searchParams as any)?.then === "function"
+            ? await (searchParams as Promise<SearchParamsShape>)
+            : (searchParams as SearchParamsShape | undefined);
+
+    const token = pickFirst(sp?.token)?.trim() ?? "";
+
+    console.log("t", token);
 
     if (!token) {
         return (
