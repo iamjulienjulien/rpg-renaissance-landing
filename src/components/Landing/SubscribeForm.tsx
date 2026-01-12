@@ -45,7 +45,7 @@ export default function SubscribeForm() {
                 return;
             }
 
-            setOk("✅ Inscription validée. À toi la prochaine notification de quête.");
+            setOk("check-email");
             setEmail("");
         } catch {
             setErr("Erreur réseau");
@@ -54,17 +54,22 @@ export default function SubscribeForm() {
         }
     };
 
-    if (ok) {
+    if (ok === "check-email") {
         return (
-            <div className="rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 p-5">
-                <div className="text-sm font-semibold text-emerald-100">
-                    ✨ Inscription confirmée
+            <div className="rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20 p-5">
+                <div className="text-sm font-semibold text-sky-100">📬 Vérifie ta boîte mail</div>
+
+                <div className="mt-2 text-sm text-sky-100/80 leading-relaxed">
+                    Un email de confirmation vient de t’être envoyé.
+                    <br />
+                    Clique sur le lien à l’intérieur pour finaliser ton inscription.
                 </div>
-                <div className="mt-2 text-sm text-emerald-100/80 leading-relaxed">
-                    Tu recevras une invitation dès l’ouverture d’une vague. Prochaine quête: rester
-                    prêt. 🗝️
+
+                <div className="mt-3 text-xs text-sky-100/70">
+                    👉 Pense à vérifier les spams ou promotions.
                 </div>
-                <div className="mt-4 text-[11px] text-emerald-100/70">
+
+                <div className="mt-4 text-[11px] text-sky-100/60">
                     Tu pourras te désinscrire à tout moment.
                 </div>
             </div>

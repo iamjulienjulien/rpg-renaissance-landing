@@ -80,7 +80,6 @@ function buildSiteUrl(origin: string | null) {
     const candidate = env || safeTrim(origin) || "http://localhost:3000";
 
     try {
-        // valide et normalise
         const u = new URL(candidate);
         return u.toString().replace(/\/$/, "");
     } catch {
@@ -89,62 +88,110 @@ function buildSiteUrl(origin: string | null) {
 }
 
 /* ============================================================================
-EMAIL (Resend)
+EMAIL (Resend) — double opt-in + List-Unsubscribe
 ============================================================================ */
 
-async function sendDoubleOptInEmail(args: { email: string; confirmUrl: string }) {
+async function sendDoubleOptInEmail(args: {
+    email: string;
+    confirmUrl: string;
+    unsubscribeUrl: string;
+}) {
     const apiKey = safeTrim(process.env.RESEND_API_KEY);
     if (!apiKey) throw new Error("Missing env: RESEND_API_KEY");
 
     const from =
         safeTrim(process.env.RESEND_FROM_EMAIL) || "RPG Renaissance <onboarding@resend.dev>";
 
-    const subject = "Confirme ton inscription à RPG Renaissance ✨";
+    const replyTo = safeTrim(process.env.RESEND_REPLY_TO) || undefined;
+
+    // Sujet sobre
+    const subject = "Confirme ton email pour RPG Renaissance";
+
+    const preheader = "Dernière étape: confirme ton adresse email pour rejoindre la liste.";
 
     const html = `
-<div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:#0b0f1a; color:#fff; padding:28px; border-radius:16px;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+  ${preheader}
+</div>
+
+<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#0b0f1a; color:#ffffff; padding:24px; border-radius:14px;">
   <div style="max-width:560px;margin:0 auto;">
-    <h1 style="margin:0 0 10px; font-size:22px; letter-spacing:-0.02em;">
-      Active ta quête: confirmation requise 🗡️
+    <h1 style="margin:0 0 10px; font-size:20px; font-weight:700;">
+      Confirme ton email
     </h1>
-    <p style="margin:0 0 16px; color:rgba(255,255,255,0.78); line-height:1.6;">
-      Tu as demandé à rejoindre la liste <b>RPG Renaissance</b>.
-      Clique sur le bouton ci-dessous pour confirmer (double opt-in).
+
+    <p style="margin:0 0 14px; color:rgba(255,255,255,0.82); line-height:1.6;">
+      Tu as demandé à rejoindre la liste <strong>RPG Renaissance</strong>.
+      Pour finaliser l’inscription (double opt-in), confirme ton adresse en cliquant ci-dessous.
     </p>
 
-    <div style="margin:22px 0;">
+    <div style="margin:18px 0 16px;">
       <a href="${args.confirmUrl}"
-         style="display:inline-block; background:#ffffff; color:#0b0f1a; text-decoration:none; font-weight:700; padding:12px 16px; border-radius:14px;">
-        ✅ Confirmer mon email
+         style="display:inline-block;background:#ffffff;color:#0b0f1a;text-decoration:none;font-weight:700;padding:12px 16px;border-radius:12px;">
+        Confirmer mon email
       </a>
     </div>
 
-    <p style="margin:0 0 12px; color:rgba(255,255,255,0.62); font-size:12px; line-height:1.5;">
+    <p style="margin:0 0 10px; color:rgba(255,255,255,0.62); font-size:12px; line-height:1.5;">
       Si le bouton ne fonctionne pas, copie-colle ce lien:
       <br/>
-      <span style="word-break:break-all; color:rgba(255,255,255,0.75);">${args.confirmUrl}</span>
+      <span style="word-break:break-all;color:rgba(255,255,255,0.78);">${args.confirmUrl}</span>
     </p>
 
-    <p style="margin:18px 0 0; color:rgba(255,255,255,0.45); font-size:12px;">
+    <hr style="border:none;border-top:1px solid rgba(255,255,255,0.10); margin:18px 0;" />
+
+    <p style="margin:0; color:rgba(255,255,255,0.50); font-size:12px; line-height:1.6;">
       Si tu n’es pas à l’origine de cette demande, ignore simplement cet email.
+      <br/>
+      <span style="color:rgba(255,255,255,0.45);">
+        Se désinscrire:
+        <a href="${args.unsubscribeUrl}" style="color:rgba(255,255,255,0.75); text-decoration:underline;">
+          ${args.unsubscribeUrl}
+        </a>
+      </span>
     </p>
   </div>
 </div>
 `.trim();
 
+    const text = `
+CONFIRME TON EMAIL (RPG Renaissance)
+
+Tu as demandé à rejoindre la liste RPG Renaissance.
+Pour finaliser l’inscription (double opt-in), ouvre ce lien :
+
+${args.confirmUrl}
+
+Si tu n’es pas à l’origine de cette demande, ignore cet email.
+
+Se désinscrire :
+${args.unsubscribeUrl}
+`.trim();
+
     const resend = new Resend(apiKey);
+
+    // anti-threading Gmail (Resend example)
+    const entityRefId = crypto.randomUUID();
 
     const { error } = await resend.emails.send({
         from,
         to: args.email,
         subject,
         html,
+        text,
+        replyTo,
+        headers: {
+            "X-Entity-Ref-ID": entityRefId,
+            // List-Unsubscribe doit être entre chevrons, et idéalement une URL HTTPS
+            "List-Unsubscribe": `<${args.unsubscribeUrl}>`,
+
+            // optionnel (Gmail one-click). On le met déjà, ça ne casse rien.
+            // Si tu veux rester strict sur ta demande, tu peux le retirer.
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
     });
 
-    if (error) {
-        // error.message existe généralement, mais on reste safe
-        throw new Error(error.message || "Resend: failed to send email");
-    }
+    if (error) throw new Error(error.message || "Resend: failed to send email");
 }
 
 /* ============================================================================
@@ -193,7 +240,7 @@ export async function POST(req: Request) {
 
         if (existingErr) return jsonError("Unable to save subscription", 500);
 
-        // Déjà confirmé => OK silencieux (anti-spam / anti-leak)
+        // Déjà confirmé => OK silencieux
         if (existing?.id && (existing.status === "confirmed" || existing.status === "subscribed")) {
             return NextResponse.json({ ok: true, already: true }, { status: 200 });
         }
@@ -239,16 +286,17 @@ export async function POST(req: Request) {
             return jsonError("Unable to save subscription", 500);
         }
 
-        // 2) Create a double opt-in token (store ONLY hash)
+        // 2) Create double opt-in token (store ONLY hash)
         const rawToken = makeToken(32);
         const token_hash = sha256(rawToken);
         const expiresAtIso = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
 
-        // Invalider anciens tokens actifs (best effort)
+        // Invalider anciens tokens actifs (double opt-in)
         await supabase
             .from("newsletter_optin_tokens")
             .update({ revoked_at: nowIso })
             .eq("subscriber_id", subscriber.id)
+            .eq("purpose", "double_opt_in")
             .is("confirmed_at", null)
             .is("revoked_at", null);
 
@@ -268,6 +316,37 @@ export async function POST(req: Request) {
 
         if (tokErr) return jsonError("Unable to create confirmation token", 500);
 
+        // 2bis) Create unsubscribe token (store ONLY hash)
+        // (long TTL: 30 jours, ajustable)
+        const rawUnsubToken = makeToken(32);
+        const unsub_token_hash = sha256(rawUnsubToken);
+        const unsubExpiresAtIso = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
+
+        // Invalider anciens tokens actifs (unsubscribe)
+        await supabase
+            .from("newsletter_optin_tokens")
+            .update({ revoked_at: nowIso })
+            .eq("subscriber_id", subscriber.id)
+            .eq("purpose", "unsubscribe")
+            .is("confirmed_at", null)
+            .is("revoked_at", null);
+
+        const { error: unsubErr } = await supabase.from("newsletter_optin_tokens").insert({
+            subscriber_id: subscriber.id,
+            token_hash: unsub_token_hash,
+            purpose: "unsubscribe",
+            expires_at: unsubExpiresAtIso,
+            sent_at: nowIso,
+
+            landing_path: landingPath,
+            referrer,
+            ...utm,
+            ip_hash,
+            user_agent: userAgent,
+        });
+
+        if (unsubErr) return jsonError("Unable to create unsubscribe token", 500);
+
         // 3) Log RGPD event
         await supabase.from("newsletter_consent_events").insert({
             subscriber_id: subscriber.id,
@@ -283,15 +362,12 @@ export async function POST(req: Request) {
         });
 
         // 4) Send email (Resend)
-        const confirmUrl = `${siteUrl}/api/subscribe/confirm?token=${rawToken}`;
+        const confirmUrl = `${siteUrl}/subscribe/confirm?token=${rawToken}`;
+        const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${rawUnsubToken}`;
 
         try {
-            await sendDoubleOptInEmail({ email, confirmUrl });
+            await sendDoubleOptInEmail({ email, confirmUrl, unsubscribeUrl });
         } catch (e) {
-            // Choix produit:
-            // A) retourner 500 pour que le front affiche "réessaie"
-            // B) retourner 200 pour ne pas aider les abuseurs (email enumeration)
-            // Ici je garde 500 car tu es en phase build, c’est plus simple à débug.
             return jsonError(e instanceof Error ? e.message : "Email send failed", 500);
         }
 
