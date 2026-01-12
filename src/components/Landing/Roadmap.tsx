@@ -35,9 +35,9 @@ export default function Roadmap() {
         <div>
             <section className="mx-auto max-w-6xl px-6 pb-15 sm:pb-15">
                 <div className="rounded-[40px] bg-black/25 ring-1 ring-white/10 p-8 sm:p-10">
-                    <div className="text-xs tracking-[0.22em] text-white/55 uppercase">
+                    <h2 className="text-xs tracking-[0.22em] text-white/55 uppercase">
                         La Roadmap
-                    </div>
+                    </h2>
                     <h3 className="mt-2 text-2xl sm:text-3xl font-bold">Les prochains chapitres</h3>
                     <p className="mt-3 text-white/70 max-w-2xl">
                         Une progression en étapes, comme une campagne: simple, lisible, solide.

@@ -1,6 +1,7 @@
 {
     "name": "RPG Renaissance",
     "short_name": "Renaissance",
+    "lang": "fr",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",

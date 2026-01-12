@@ -4,6 +4,7 @@
 import { motion } from "framer-motion";
 import Glow from "./Glow";
 import SubscribeForm from "./SubscribeForm";
+import Image from "next/image";
 // import RunicParticles from "./RunicParticles";
 
 function cn(...classes: Array<string | false | null | undefined>) {
@@ -12,21 +13,25 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 export default function Hero() {
     return (
-        <section className="relative">
-            {/* <RunicParticles density={52} /> */}
-            {/* <Glow /> */}
-
+        <header className="relative">
             <div className="mx-auto max-w-6xl px-6 pt-16 pb-10 sm:pt-24">
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-2xl bg-white/5 ring-1 ring-white/10 grid place-items-center">
                             <span className="text-lg">
-                                <img src="favicon-32x32.png" alt="RPG Renaissance" />
+                                <Image
+                                    src="/assets/logos/icon_renaissance.png"
+                                    alt="RPG Renaissance"
+                                    width={32}
+                                    height={32}
+                                />
                             </span>
                         </div>
                         <div className="text-sm text-white/70">
-                            <div className="font-semibold text-white/90">RPG Renaissance</div>
-                            <div className="text-xs">rpg-renaissance.com</div>
+                            <h1 id="hero-title" className="font-semibold text-white/90">
+                                RPG Renaissance
+                            </h1>
+                            <p className="text-xs">✨ La renaissance, en mode jeu de rôle. 🧙</p>
                         </div>
                     </div>
 
@@ -52,7 +57,7 @@ export default function Hero() {
                             ⚔️ Le jeu de rôle où le boss final, c’est tes propres limites.
                         </motion.div>
 
-                        <motion.h1
+                        <motion.h2
                             initial={{ opacity: 0, y: 14 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.65, delay: 0.05 }}
@@ -60,7 +65,7 @@ export default function Hero() {
                         >
                             Deviens ton propre personnage.
                             <span className="block text-white/70">Écris ta Renaissance.</span>
-                        </motion.h1>
+                        </motion.h2>
 
                         <motion.p
                             initial={{ opacity: 0, y: 14 }}
@@ -128,21 +133,29 @@ export default function Hero() {
                         transition={{ duration: 0.7, delay: 0.12 }}
                         className="relative flex flex-col justify-between h-full"
                     >
-                        <div className="mt-15">
-                            <img
-                                src="assets/logos/logo_renaissance_classic.png"
-                                alt="RPG Renaissance"
+                        <div className="mt-7">
+                            <Image
+                                src="/assets/logos/logo_renaissance.png"
+                                alt="Logo RPG Renaissance"
+                                width={230}
+                                height={230}
                                 className="m-auto"
                             />
                         </div>
 
-                        <div id="subscribe" className="relative">
+                        <section
+                            id="subscribe"
+                            aria-labelledby="subscribe-title"
+                            className="relative"
+                        >
+                            <h2 id="subscribe-title" className="sr-only">
+                                Rejoindre la liste
+                            </h2>
                             <SubscribeForm />
-                            <div className="pointer-events-none absolute -inset-4 rounded-4xl ring-1 ring-white/10 blur-[1px]" />
-                        </div>
+                        </section>
                     </motion.div>
                 </div>
             </div>
-        </section>
+        </header>
     );
 }

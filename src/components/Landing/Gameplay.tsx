@@ -38,12 +38,12 @@ export default function Gameplay() {
         <section className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
             <div className="flex items-end justify-between gap-4">
                 <div>
-                    <div className="text-xs tracking-[0.22em] text-white/55 uppercase">
+                    <h2 className="text-xs tracking-[0.22em] text-white/55 uppercase">
                         La Boucle de jeu
-                    </div>
-                    <h2 className="mt-2 text-2xl sm:text-3xl font-bold">
-                        La progression, version RPG
                     </h2>
+                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">
+                        La progression, version RPG
+                    </h3>
                     <p className="mt-3 text-white/70 max-w-2xl">
                         Pas de blabla. Une boucle simple, répétable, qui transforme tes journées en
                         montée en puissance.

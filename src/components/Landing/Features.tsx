@@ -40,12 +40,12 @@ export default function Features() {
         <section id="features" className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
             <div className="flex items-end justify-between gap-4">
                 <div>
-                    <div className="text-xs tracking-[0.22em] text-white/55 uppercase">
+                    <h2 className="text-xs tracking-[0.22em] text-white/55 uppercase">
                         Le concept
-                    </div>
-                    <h2 className="mt-2 text-2xl sm:text-3xl font-bold">
-                        Une app, un jeu, une montée en puissance
                     </h2>
+                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">
+                        Une app, un jeu, une montée en puissance
+                    </h3>
                     <p className="mt-3 text-white/70 max-w-2xl">
                         RPG Renaissance transforme ta progression personnelle en aventure: claire,
                         épique, mesurable.
