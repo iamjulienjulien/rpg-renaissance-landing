@@ -70,6 +70,7 @@ export const metadata: Metadata = {
         title: `${siteName} | ${defaultTitle}`,
         description: siteDescription,
         images: ["/og.jpg"],
+        creator: "@iamjulienjulien",
     },
 };
 
