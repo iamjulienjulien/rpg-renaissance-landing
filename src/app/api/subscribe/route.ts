@@ -105,7 +105,7 @@ async function sendDoubleOptInEmail(args: {
     const replyTo = safeTrim(process.env.RESEND_REPLY_TO) || undefined;
 
     // Sujet sobre
-    const subject = "Message de test – RPG Renaissance";
+    const subject = "Confirme ton inscription à RPG Renaissance ✨";
 
     const preheader = "Dernière étape: confirme ton adresse email pour rejoindre la liste.";
 
