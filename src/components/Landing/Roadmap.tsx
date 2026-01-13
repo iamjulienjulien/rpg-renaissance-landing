@@ -58,8 +58,10 @@ export default function Roadmap() {
                                     <div className="font-semibold text-white/90">{s.title}</div>
                                     <div className="text-sm text-white/70">{s.desc}</div>
                                 </div>
-                                <div className="text-xs rounded-full bg-black/30 ring-1 ring-white/10 px-3 py-1 text-white/80">
-                                    {s.badge}
+                                <div className="self-start sm:self-auto">
+                                    <div className="inline-flex text-xs rounded-full bg-black/30 ring-1 ring-white/10 px-3 py-1 text-white/80 whitespace-nowrap">
+                                        {s.badge}
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
