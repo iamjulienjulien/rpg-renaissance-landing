@@ -199,7 +199,7 @@ export default function RunicParticles({
 
     return (
         <div className="pointer-events-none absolute inset-0 -z-10">
-            <canvas ref={canvasRef} className="h-full w-full opacity-70" />
+            <canvas ref={canvasRef} className="h-full w-full opacity-90" />
             {/* vignette & chromatic haze */}
             <div
                 className="absolute inset-0"

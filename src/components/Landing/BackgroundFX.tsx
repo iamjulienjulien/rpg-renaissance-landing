@@ -11,10 +11,12 @@ import Glow from "@/components/Landing/Glow";
 import Sigils from "@/components/Landing/Sigils";
 
 export default function BackgroundFX() {
+    const isMobile =
+        typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
     return (
         <div className="absolute inset-0">
             <Sigils />
-            <RunicParticles density={52} />
+            <RunicParticles density={isMobile ? 20 : 70} />
             <Glow />
             <CursorGlow />
             <FilmGrain />
