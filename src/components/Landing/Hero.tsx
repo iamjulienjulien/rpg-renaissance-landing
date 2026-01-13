@@ -24,6 +24,7 @@ export default function Hero() {
                                     alt="RPG Renaissance"
                                     width={32}
                                     height={32}
+                                    priority
                                 />
                             </span>
                         </div>
@@ -139,6 +140,8 @@ export default function Hero() {
                                 alt="Logo RPG Renaissance"
                                 width={230}
                                 height={230}
+                                sizes="(max-width: 1024px) 60vw, 420px"
+                                priority
                                 className="m-auto"
                             />
                         </div>

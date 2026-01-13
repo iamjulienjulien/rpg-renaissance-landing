@@ -2,6 +2,7 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Script from "next/script";
+import BackgroundFX from "@/components/Landing/BackgroundFX";
 
 const siteName = "RPG Renaissance";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.rpg-renaissance.com";
@@ -82,9 +83,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="fr" className="overflow-hidden">
+        <html lang="fr">
             <head>
-                {/* 1) Stub: permet de queue les events AVANT chargement du script */}
                 <Script id="plausible-stub" strategy="beforeInteractive">
                     {`
                       window.plausible = window.plausible || function() {
@@ -92,8 +92,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       }
                     `}
                 </Script>
-
-                {/* 2) Script Plausible */}
                 <Script
                     strategy="afterInteractive"
                     defer
@@ -101,14 +99,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     src="https://plausible.io/js/script.js"
                 />
             </head>
-            <body className="min-h-screen text-white bg-black overflow-x-hidden">
-                {/* Background global (ne dépend d'aucune section) */}
-                <div className="fixed inset-0 -z-10">
-                    <div className="absolute inset-0 bg-[radial-gradient(1200px_circle_at_20%_10%,rgba(120,60,255,0.18),transparent_55%),radial-gradient(900px_circle_at_80%_30%,rgba(40,200,255,0.12),transparent_55%),radial-gradient(900px_circle_at_50%_90%,rgba(255,180,60,0.10),transparent_60%)]" />
+            <body className="min-h-screen text-white overflow-x-hidden">
+                <div className="fixed inset-0 -z-10 pointer-events-none">
+                    <div className="absolute inset-0 bg-[radial-gradient(1200px_circle_at_20%_10%,rgba(120,60,255,0.18),transparent_55%),radial-gradient(900px_circle_at_80%_30%,rgba(40,200,255,0.12),transparent_55%),radial-gradient(900px_circle_at_50%_90%,rgba(255,180,60,0.10),transparent_60%)] transform-[translateZ(0)]" />
                     <div className="absolute inset-0 bg-black/55" />
+                    <BackgroundFX />
                 </div>
-
-                {/* Contenu au-dessus */}
                 <div className="relative z-10 min-h-screen">{children}</div>
             </body>
         </html>

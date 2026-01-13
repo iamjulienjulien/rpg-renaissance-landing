@@ -42,6 +42,7 @@ export default function SubscribeForm() {
             const j = await res.json().catch(() => null);
 
             if (!res.ok) {
+                track("subscribe_error");
                 setErr((j?.error as string) || "Impossible de s’inscrire");
                 return;
             }

@@ -62,33 +62,41 @@ export default function Gameplay() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-80px" }}
                         transition={{ duration: 0.5, delay: idx * 0.05 }}
-                        className={cn(
-                            "relative overflow-hidden rounded-3xl bg-black/25 ring-1 ring-white/10 p-6",
-                            "hover:bg-black/30 transition"
-                        )}
                     >
-                        <div
-                            className="pointer-events-none absolute -inset-24 opacity-60"
-                            style={{
-                                background:
-                                    "radial-gradient(circle at 30% 20%, rgba(0,255,255,0.10), transparent 55%)," +
-                                    "radial-gradient(circle at 80% 70%, rgba(168,85,247,0.10), transparent 55%)",
-                            }}
-                        />
+                        <motion.div
+                            whileHover={{ y: -6, scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                            className={cn(
+                                "group relative overflow-hidden rounded-3xl bg-black/25 ring-1 ring-white/10 p-6",
+                                "hover:bg-black/30 transition",
+                                "h-full flex flex-col"
+                            )}
+                        >
+                            {/* sheen (identique à Features) */}
+                            <div
+                                className="pointer-events-none absolute -inset-24 opacity-0 group-hover:opacity-100 transition duration-300"
+                                style={{
+                                    background:
+                                        "radial-gradient(circle at 30% 20%, rgba(0,255,255,0.14), transparent 55%)," +
+                                        "radial-gradient(circle at 80% 60%, rgba(168,85,247,0.14), transparent 55%)",
+                                }}
+                            />
 
-                        <div className="relative">
-                            <div className="flex items-center justify-between">
-                                <div className="h-11 w-11 rounded-2xl bg-white/5 ring-1 ring-white/10 grid place-items-center text-lg">
-                                    {s.icon}
+                            <div className="relative flex flex-col h-full">
+                                <div className="flex items-center justify-between">
+                                    <div className="h-11 w-11 rounded-2xl bg-white/5 ring-1 ring-white/10 grid place-items-center text-lg">
+                                        {s.icon}
+                                    </div>
+                                    <div className="text-xs text-white/45 font-mono">{s.n}</div>
                                 </div>
-                                <div className="text-xs text-white/45 font-mono">{s.n}</div>
-                            </div>
 
-                            <div className="mt-4 font-semibold text-white/90">{s.title}</div>
-                            <div className="mt-2 text-sm text-white/70 leading-relaxed">
-                                {s.desc}
+                                <div className="mt-4 font-semibold text-white/90">{s.title}</div>
+                                <div className="mt-2 text-sm text-white/70 leading-relaxed flex-1">
+                                    {s.desc}
+                                </div>
                             </div>
-                        </div>
+                        </motion.div>
                     </motion.div>
                 ))}
             </div>
