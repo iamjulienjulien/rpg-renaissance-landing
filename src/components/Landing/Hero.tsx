@@ -20,11 +20,11 @@ export default function Hero() {
                         <div className="h-10 w-10 rounded-2xl bg-white/5 ring-1 ring-white/10 grid place-items-center">
                             <span className="text-lg">
                                 <Image
-                                    src="/assets/logos/icon_renaissance.png"
+                                    src="/assets/logos/icon_renaissance.avif"
                                     alt="RPG Renaissance"
                                     width={32}
                                     height={32}
-                                    priority
+                                    priority={false}
                                 />
                             </span>
                         </div>
@@ -136,7 +136,7 @@ export default function Hero() {
                     >
                         <div className="mt-7">
                             <Image
-                                src="/assets/logos/logo_renaissance.png"
+                                src="/assets/logos/logo_renaissance.avif"
                                 alt="Logo RPG Renaissance"
                                 width={230}
                                 height={230}
