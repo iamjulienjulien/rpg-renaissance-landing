@@ -1,55 +1,35 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { GAMEPLAY_COPY, type GameplayLocale, type GameplayCopyKey } from "./gameplay.copy";
+import { useLocale } from "@/components/I18n/LocaleProvider";
 
 function cn(...classes: Array<string | false | null | undefined>) {
     return classes.filter(Boolean).join(" ");
 }
 
-const STEPS = [
-    {
-        n: "01",
-        title: "Choisis une quête",
-        desc: "Un objectif clair, transformé en mission jouable avec une récompense.",
-        icon: "🎯",
-    },
-    {
-        n: "02",
-        title: "Joue dans la vraie vie",
-        desc: "Tu avances par micro-actions. Chaque pas est compté, pas jugé.",
-        icon: "👣",
-    },
-    {
-        n: "03",
-        title: "Gagne de la Renommée",
-        desc: "Badges, niveaux, momentum. Ton progrès devient visible.",
-        icon: "🏆",
-    },
-    {
-        n: "04",
-        title: "Débloque un pouvoir",
-        desc: "Rituels, inventaires, buffs. Tu t’équipes pour continuer.",
-        icon: "🔓",
-    },
-];
-
 export default function Gameplay() {
+    const locale = useLocale() as GameplayLocale;
+    const t = <K extends GameplayCopyKey>(key: K) => GAMEPLAY_COPY[key][locale];
+
+    const STEPS = [
+        { n: "01", title: t("step_01_title"), desc: t("step_01_desc"), icon: "🎯" },
+        { n: "02", title: t("step_02_title"), desc: t("step_02_desc"), icon: "👣" },
+        { n: "03", title: t("step_03_title"), desc: t("step_03_desc"), icon: "🏆" },
+        { n: "04", title: t("step_04_title"), desc: t("step_04_desc"), icon: "🔓" },
+    ];
+
     return (
         <section className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
             <div className="flex items-end justify-between gap-4">
                 <div>
                     <h2 className="text-xs tracking-[0.22em] text-white/55 uppercase">
-                        La Boucle de jeu
+                        {t("kicker")}
                     </h2>
-                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">
-                        La progression, version RPG
-                    </h3>
-                    <p className="mt-3 text-white/70 max-w-2xl">
-                        Pas de blabla. Une boucle simple, répétable, qui transforme tes journées en
-                        montée en puissance.
-                    </p>
+                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">{t("title")}</h3>
+                    <p className="mt-3 text-white/70 max-w-2xl">{t("lead")}</p>
                     <p className="mt-5 text-sm text-white/50 leading-relaxed max-w-xl">
-                        Chaque journée devient une petite scène de jeu.
+                        {t("sublead")}
                     </p>
                 </div>
             </div>
@@ -73,7 +53,6 @@ export default function Gameplay() {
                                 "h-full flex flex-col"
                             )}
                         >
-                            {/* sheen (identique à Features) */}
                             <div
                                 className="pointer-events-none absolute -inset-24 opacity-0 group-hover:opacity-100 transition duration-300"
                                 style={{

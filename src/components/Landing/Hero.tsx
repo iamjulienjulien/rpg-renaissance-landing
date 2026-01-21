@@ -1,17 +1,23 @@
-// src/components/Landing/Hero.tsx
 "use client";
 
 import { motion } from "framer-motion";
 import Glow from "./Glow";
 import SubscribeForm from "./SubscribeForm";
 import Image from "next/image";
-// import RunicParticles from "./RunicParticles";
+
+import { HERO_COPY, type HeroLocale, type HeroCopyKey } from "./hero.copy";
+import { useLocale } from "@/components/I18n/LocaleProvider";
 
 function cn(...classes: Array<string | false | null | undefined>) {
     return classes.filter(Boolean).join(" ");
 }
 
 export default function Hero() {
+    const locale = useLocale() as HeroLocale;
+
+    const t = <K extends HeroCopyKey>(key: K) => HERO_COPY[key][locale];
+    const badges = t("badges") as string[];
+
     return (
         <header className="relative">
             <div className="mx-auto max-w-6xl px-6 pt-6 md:pt-10 pb-10 ">
@@ -21,7 +27,7 @@ export default function Hero() {
                             <span className="text-lg">
                                 <Image
                                     src="/assets/logos/icon_renaissance.avif"
-                                    alt="RPG Renaissance"
+                                    alt={t("logo_alt_icon") as string}
                                     width={32}
                                     height={32}
                                     priority={false}
@@ -33,9 +39,9 @@ export default function Hero() {
                                 id="hero-title"
                                 className="font-semibold text-white/90 text-right sm:text-left"
                             >
-                                RPG Renaissance
+                                {t("brand_title") as string}
                             </h1>
-                            <p className="text-xs">✨ La renaissance, en mode jeu de rôle. 🧙</p>
+                            <p className="text-xs">{t("brand_tagline") as string}</p>
                         </div>
                     </div>
 
@@ -46,7 +52,7 @@ export default function Hero() {
                             "bg-white/10 ring-1 ring-white/15 hover:bg-white/15 transition"
                         )}
                     >
-                        ✨ Rejoindre la liste
+                        {t("cta_join_list") as string}
                     </a>
                 </div>
 
@@ -59,14 +65,14 @@ export default function Hero() {
                                 transition={{ duration: 0.55 }}
                                 className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-4 py-2 text-sm text-white/80"
                             >
-                                ⚔️ Le jeu de rôle où le boss final, c’est tes propres limites.
+                                {t("pill_boss_final") as string}
                             </motion.div>
                         </div>
 
                         <div className="block lg:hidden">
                             <Image
                                 src="/assets/logos/logo_renaissance.avif"
-                                alt="Logo RPG Renaissance"
+                                alt={t("logo_alt_main") as string}
                                 width={230}
                                 height={230}
                                 sizes="(max-width: 1024px) 60vw, 420px"
@@ -81,8 +87,10 @@ export default function Hero() {
                             transition={{ duration: 0.65, delay: 0.05 }}
                             className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight"
                         >
-                            Deviens ton propre personnage.
-                            <span className="block text-white/70">Écris ta Renaissance.</span>
+                            {t("headline_line1") as string}
+                            <span className="block text-white/70">
+                                {t("headline_line2") as string}
+                            </span>
                         </motion.h2>
 
                         <div className="flex lg:hidden justify-start mt-7 mb-7">
@@ -92,7 +100,7 @@ export default function Hero() {
                                 transition={{ duration: 0.55 }}
                                 className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-4 py-2 text-sm text-white/80"
                             >
-                                ⚔️ Le jeu de rôle où le boss final, c’est tes propres limites.
+                                {t("pill_boss_final") as string}
                             </motion.div>
                         </div>
 
@@ -102,29 +110,20 @@ export default function Hero() {
                             transition={{ duration: 0.65, delay: 0.1 }}
                             className="mt-5 text-lg text-white/70 leading-relaxed max-w-none lg:max-w-xl"
                         >
-                            Un RPG introspectif, narratif et évolutif: tu choisis tes quêtes, tu
-                            gagnes de l’élan, tu débloques des pouvoirs… et tu avances dans la vraie
-                            vie. 🧠✨
+                            {t("lead") as string}
                         </motion.p>
+
                         <motion.p
                             initial={{ opacity: 0, y: 14 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.65, delay: 0.1 }}
                             className="mt-5 text-sm text-white/50 leading-relaxed max-w-xl"
                         >
-                            Un jeu narratif pour transformer ta progression personnelle en aventure
-                            concrète.
+                            {t("sublead") as string}
                         </motion.p>
 
                         <div className="mt-7 flex flex-wrap gap-2">
-                            {[
-                                "🌍 Une aventure à vivre",
-                                "🧭 Un voyage guidé, pas imposé",
-                                "📜 Quêtes du quotidien",
-                                "🔮 Rituels simples, impact réel",
-                                "🎖️ Des preuves de chemin parcouru",
-                                "🔥 Te voir autrement",
-                            ].map((x) => (
+                            {badges.map((x) => (
                                 <span
                                     key={x}
                                     className="rounded-full bg-black/20 px-3 py-1 text-xs text-white/75 ring-1 ring-white/10"
@@ -139,19 +138,19 @@ export default function Hero() {
                                 href="#subscribe"
                                 className="inline-flex items-center justify-center w-full md:w-1/2 lg:w-auto rounded-2xl px-5 py-3 font-semibold bg-white text-black hover:bg-white/90 transition"
                             >
-                                🔥 Être prévenu du lancement
+                                {t("cta_notify_launch") as string}
                             </a>
 
                             <a
                                 href="#features"
                                 className="inline-flex items-center justify-center w-full md:w-1/2 lg:w-auto rounded-2xl px-5 py-3 font-semibold bg-white/10 ring-1 ring-white/15 hover:bg-white/15 transition"
                             >
-                                🧩 Comment ça fonctionne
+                                {t("cta_how_it_works") as string}
                             </a>
                         </div>
 
                         <div className="mt-6 text-xs text-white/50">
-                            Pas de spam. Juste un signal quand ton aventure peut commencer.
+                            {t("fineprint_no_spam") as string}
                         </div>
                     </div>
 
@@ -164,7 +163,7 @@ export default function Hero() {
                         <div className="mt-7 hidden lg:block">
                             <Image
                                 src="/assets/logos/logo_renaissance.avif"
-                                alt="Logo RPG Renaissance"
+                                alt={t("logo_alt_main") as string}
                                 width={230}
                                 height={230}
                                 sizes="(max-width: 1024px) 60vw, 420px"
@@ -179,7 +178,7 @@ export default function Hero() {
                             className="relative"
                         >
                             <h2 id="subscribe-title" className="sr-only">
-                                Rejoindre la liste
+                                {t("subscribe_sr_title") as string}
                             </h2>
                             <SubscribeForm />
                         </section>

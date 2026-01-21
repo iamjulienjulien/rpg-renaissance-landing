@@ -1,12 +1,8 @@
-// src/app/privacy/page.tsx
 import type { Metadata } from "next";
+import React from "react";
 
-export const metadata: Metadata = {
-    title: "Politique de confidentialité",
-    description: "Politique de confidentialité et informations RGPD pour RPG Renaissance.",
-    alternates: { canonical: "/privacy" },
-    robots: { index: true, follow: true },
-};
+import { getRequestLocale } from "@/components/I18n/getRequestLocale";
+import { PRIVACY_COPY, type PrivacyLocale, type PrivacyCopyKey } from "./privacy.copy";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -17,114 +13,113 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     );
 }
 
-export default function PrivacyPage() {
+export async function generateMetadata(): Promise<Metadata> {
+    const locale = (await getRequestLocale()) as PrivacyLocale;
+    const t = <K extends PrivacyCopyKey>(key: K) => PRIVACY_COPY[key][locale];
+
+    return {
+        title: t("meta_title"),
+        description: t("meta_description"),
+        alternates: { canonical: "/privacy" },
+        robots: { index: true, follow: true },
+    };
+}
+
+export default async function PrivacyPage() {
+    const locale = (await getRequestLocale()) as PrivacyLocale;
+    const t = <K extends PrivacyCopyKey>(key: K) => PRIVACY_COPY[key][locale];
+
     return (
         <main className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
             <header className="mb-10 space-y-3">
-                <p className="text-xs tracking-[0.22em] text-white/55 uppercase">Données</p>
+                <p className="text-xs tracking-[0.22em] text-white/55 uppercase">{t("kicker")}</p>
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                    Politique de confidentialité
+                    {t("page_title")}
                 </h1>
                 <p className="text-sm text-white/60">
-                    Dernière mise à jour : <b>13/01/2026</b>
+                    {t("last_update_label")} <b>{t("last_update_date")}</b>
                 </p>
             </header>
 
             <div className="space-y-4">
-                <Section title="Qui traite les données ?">
+                <Section title={t("section_controller_title")}>
                     <p>
-                        Le responsable de traitement est l’éditeur du site <b>RPG Renaissance</b>.
+                        {t("controller_p1").replace("RPG Renaissance", "")}
+                        <b>RPG Renaissance</b>.
                     </p>
                     <p>
-                        Contact :{" "}
+                        {t("controller_contact_label")}{" "}
                         <a className="underline" href="mailto:hello@rpg-renaissance.com">
                             hello@rpg-renaissance.com
                         </a>
                     </p>
                 </Section>
 
-                <Section title="Données collectées">
+                <Section title={t("section_collected_title")}>
+                    <p>{t("collected_intro")}</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>{t("collected_item_email")}</li>
+                        <li>{t("collected_item_consent")}</li>
+                        <li>{t("collected_item_tech")}</li>
+                        <li>{t("collected_item_referrer")}</li>
+                        <li>{t("collected_item_iphash")}</li>
+                    </ul>
+                </Section>
+
+                <Section title={t("section_purposes_title")}>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>{t("purposes_item_waitlist")}</li>
+                        <li>{t("purposes_item_project_updates")}</li>
+                        <li>{t("purposes_item_analytics")}</li>
+                    </ul>
+                </Section>
+
+                <Section title={t("section_legal_basis_title")}>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>
+                            <b>Consentement</b> :{" "}
+                            {t("legal_basis_item_consent").replace("Consentement :", "").trim()}
+                        </li>
+                        <li>
+                            <b>Intérêt légitime</b> :{" "}
+                            {t("legal_basis_item_legitimate_interest")
+                                .replace("Intérêt légitime :", "")
+                                .trim()}
+                        </li>
+                    </ul>
+                </Section>
+
+                <Section title={t("section_recipients_title")}>
+                    <p>{t("recipients_intro")}</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>{t("recipients_item_email_provider")}</li>
+                        <li>{t("recipients_item_db")}</li>
+                        <li>{t("recipients_item_hosting")}</li>
+                        <li>{t("recipients_item_analytics")}</li>
+                    </ul>
+                </Section>
+
+                <Section title={t("section_retention_title")}>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>{t("retention_item_waitlist")}</li>
+                        <li>{t("retention_item_logs")}</li>
+                        <li>{t("retention_item_consent_proof")}</li>
+                    </ul>
+                </Section>
+
+                <Section title={t("section_rights_title")}>
+                    <p>{t("rights_p1")}</p>
                     <p>
-                        Lors d’une pré-inscription (newsletter / liste d’attente), nous collectons :
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li>Adresse email</li>
-                        <li>Consentement (date, version)</li>
-                        <li>Éléments techniques minimaux (user-agent, langue)</li>
-                        <li>Contexte de provenance (page d’entrée, paramètres UTM si présents)</li>
-                        <li>Empreinte technique pseudonymisée (adresse IP hashé)</li>
-                    </ul>
-                </Section>
-
-                <Section title="Finalités">
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li>
-                            Gérer la liste d’attente et envoyer les emails de confirmation (double
-                            opt-in)
-                        </li>
-                        <li>
-                            Envoyer des informations liées au projet (lancement, ouverture des
-                            tests, nouveautés)
-                        </li>
-                        <li>
-                            Mesurer l’audience de façon respectueuse (analytics “soft” si activés)
-                        </li>
-                    </ul>
-                </Section>
-
-                <Section title="Base légale (RGPD)">
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li>
-                            <b>Consentement</b> : inscription à la liste (double opt-in)
-                        </li>
-                        <li>
-                            <b>Intérêt légitime</b> : comprendre l’usage du site de manière agrégée
-                        </li>
-                    </ul>
-                </Section>
-
-                <Section title="Destinataires & sous-traitants">
-                    <p>
-                        Les données peuvent être traitées via des prestataires techniques
-                        nécessaires au fonctionnement :
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li>Fournisseur d’emailing (Resend)</li>
-                        <li>Base de données / stockage (Supabase)</li>
-                        <li>Hébergement / déploiement (Vercel)</li>
-                        <li>Analytics (Plausible) si activé</li>
-                    </ul>
-                </Section>
-
-                <Section title="Durées de conservation">
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li>Liste d’attente : jusqu’au désabonnement ou suppression</li>
-                        <li>Logs techniques : durée courte, strictement nécessaire</li>
-                        <li>
-                            Preuves de consentement : durée raisonnable pour justifier la conformité
-                        </li>
-                    </ul>
-                </Section>
-
-                <Section title="Vos droits">
-                    <p>
-                        Conformément au RGPD, vous disposez notamment des droits d’accès, de
-                        rectification, d’effacement, d’opposition et de limitation.
-                    </p>
-                    <p>
-                        Pour exercer vos droits :{" "}
+                        {t("rights_p2_label")}{" "}
                         <a className="underline" href="mailto:hello@rpg-renaissance.com">
                             hello@rpg-renaissance.com
                         </a>
                     </p>
-                    <p>Vous pouvez également introduire une réclamation auprès de la CNIL.</p>
+                    <p>{t("rights_p3")}</p>
                 </Section>
 
-                <Section title="Cookies">
-                    <p>
-                        Le site peut fonctionner sans cookies. Si un outil analytics cookieless est
-                        utilisé, il mesure l’audience de façon agrégée, sans profilage individuel.
-                    </p>
+                <Section title={t("section_cookies_title")}>
+                    <p>{t("cookies_p1")}</p>
                 </Section>
             </div>
         </main>

@@ -1,14 +1,9 @@
-// src/app/subscribe/confirm/page.tsx
 import type { Metadata } from "next";
+import React from "react";
 import PlausibleEvent from "./plausible-event";
 
-export const metadata: Metadata = {
-    title: "Confirmation",
-    robots: {
-        index: false,
-        follow: true,
-    },
-};
+import { getRequestLocale } from "@/components/I18n/getRequestLocale";
+import { CONFIRM_COPY, type ConfirmLocale, type ConfirmCopyKey } from "./confirm.copy";
 
 type SearchParamsValue = string | string[] | undefined;
 type SearchParamsShape = Record<string, SearchParamsValue>;
@@ -35,7 +30,20 @@ async function confirmOptIn(token: string) {
     return res.json();
 }
 
+export async function generateMetadata(): Promise<Metadata> {
+    const locale = (await getRequestLocale()) as ConfirmLocale;
+    const t = <K extends ConfirmCopyKey>(key: K) => CONFIRM_COPY[key][locale];
+
+    return {
+        title: t("meta_title"),
+        robots: { index: false, follow: true },
+    };
+}
+
 export default async function SubscribeConfirmPage({ searchParams }: Props) {
+    const locale = (await getRequestLocale()) as ConfirmLocale;
+    const t = <K extends ConfirmCopyKey>(key: K) => CONFIRM_COPY[key][locale];
+
     const sp =
         searchParams && typeof (searchParams as any)?.then === "function"
             ? await (searchParams as Promise<SearchParamsShape>)
@@ -46,11 +54,11 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
     if (!token) {
         return (
             <ConfirmLayout>
-                <Title>❌ Lien invalide</Title>
+                <Title>{t("invalid_title")}</Title>
                 <Text>
-                    Ce parchemin est illisible.
+                    {t("invalid_body_line1")}
                     <br />
-                    Le lien de confirmation est manquant ou incorrect.
+                    {t("invalid_body_line2")}
                 </Text>
             </ConfirmLayout>
         );
@@ -63,11 +71,11 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
     } catch {
         return (
             <ConfirmLayout>
-                <Title>⚠️ Une magie a mal tourné</Title>
+                <Title>{t("error_title")}</Title>
                 <Text>
-                    Impossible de confirmer ton inscription pour le moment.
+                    {t("error_body_line1")}
                     <br />
-                    Réessaie plus tard.
+                    {t("error_body_line2")}
                 </Text>
             </ConfirmLayout>
         );
@@ -76,15 +84,14 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
     if (result?.already) {
         return (
             <ConfirmLayout>
-                {/* (optionnel) event aussi si tu veux compter “déjà confirmé” */}
                 <PlausibleEvent name="subscribe_confirmed_already" />
-                <Title>✅ Déjà confirmé</Title>
+                <Title>{t("already_title")}</Title>
                 <Text>
-                    Ta quête est déjà active.
+                    {t("already_body_line1")}
                     <br />
-                    Tu es bien inscrit à RPG Renaissance.
+                    {t("already_body_line2")}
                 </Text>
-                <PrimaryLink href="/">🏕️ Retour au camp de base</PrimaryLink>
+                <PrimaryLink href="/">{t("already_cta")}</PrimaryLink>
             </ConfirmLayout>
         );
     }
@@ -92,38 +99,39 @@ export default async function SubscribeConfirmPage({ searchParams }: Props) {
     if (!result?.ok) {
         return (
             <ConfirmLayout>
-                <Title>❌ Confirmation échouée</Title>
+                <Title>{t("failed_title")}</Title>
                 <Text>
-                    Ce lien a peut-être expiré.
+                    {t("failed_body_line1")}
                     <br />
-                    Tu peux recommencer depuis la page d’inscription.
+                    {t("failed_body_line2")}
                 </Text>
-                <PrimaryLink href="/">↩ Retour à la landing</PrimaryLink>
+                <PrimaryLink href="/">{t("failed_cta")}</PrimaryLink>
             </ConfirmLayout>
         );
     }
 
     return (
         <ConfirmLayout>
-            {/* ✅ event uniquement quand OK */}
             <PlausibleEvent name="subscribe_confirmed" />
 
-            <Title>✨ Quête confirmée</Title>
+            <Title>{t("ok_title")}</Title>
+
             <Text>
-                Ton inscription à <b>RPG Renaissance</b> est validée.
+                {t("ok_body_line1_before_brand")} <b>{t("brand")}</b>{" "}
+                {t("ok_body_line1_after_brand")}
                 <br />
-                L’aventure commencera bientôt.
+                {t("ok_body_line2")}
             </Text>
 
             <Divider />
 
             <Text subtle>
-                Tu recevras les prochaines nouvelles quand le moment sera juste.
+                {t("ok_subtle_line1")}
                 <br />
-                Pas de spam. Pas de pression. Juste du sens.
+                {t("ok_subtle_line2")}
             </Text>
 
-            <PrimaryLink href="/">🏕️ Retour au camp de base</PrimaryLink>
+            <PrimaryLink href="/">{t("ok_cta")}</PrimaryLink>
         </ConfirmLayout>
     );
 }

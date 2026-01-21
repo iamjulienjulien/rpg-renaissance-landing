@@ -1,7 +1,11 @@
-// src/app/unsubscribe/unsubscribe-client.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import {
+    UNSUBSCRIBE_COPY,
+    type UnsubscribeLocale,
+    type UnsubscribeCopyKey,
+} from "./unsubscribe.copy";
 
 type ApiState =
     | { status: "idle" }
@@ -13,9 +17,11 @@ function safeTrim(x: unknown) {
     return typeof x === "string" ? x.trim() : "";
 }
 
-export default function UnsubscribeClient(props: { token: string }) {
-    const token = useMemo(() => safeTrim(props.token), [props.token]);
+export default function UnsubscribeClient(props: { token: string; locale: UnsubscribeLocale }) {
+    const locale: UnsubscribeLocale = props.locale ?? "en";
+    const t = <K extends UnsubscribeCopyKey>(key: K) => UNSUBSCRIBE_COPY[key][locale];
 
+    const token = useMemo(() => safeTrim(props.token), [props.token]);
     const [state, setState] = useState<ApiState>(() => ({ status: "idle" }));
 
     useEffect(() => {
@@ -37,17 +43,17 @@ export default function UnsubscribeClient(props: { token: string }) {
                 if (!r.ok) {
                     setState({
                         status: "error",
-                        message: j?.error || "Impossible de traiter la demande.",
+                        message: j?.error || (t("error_generic") as string),
                     });
                     return;
                 }
 
                 setState({
                     status: "success",
-                    message: j?.message || "Tu as bien été désinscrit.",
+                    message: j?.message || (t("success_generic") as string),
                 });
             } catch {
-                setState({ status: "error", message: "Erreur réseau. Réessaie." });
+                setState({ status: "error", message: t("error_network") as string });
             }
         };
 
@@ -61,7 +67,7 @@ export default function UnsubscribeClient(props: { token: string }) {
         if (!canSubmit) {
             setState({
                 status: "error",
-                message: "Lien invalide (token manquant).",
+                message: t("error_missing_token") as string,
             });
             return;
         }
@@ -78,36 +84,30 @@ export default function UnsubscribeClient(props: { token: string }) {
             if (!r.ok) {
                 setState({
                     status: "error",
-                    message: j?.error || "Impossible de traiter la demande.",
+                    message: j?.error || (t("error_generic") as string),
                 });
                 return;
             }
 
             setState({
                 status: "success",
-                message: j?.message || "Tu as bien été désinscrit.",
+                message: j?.message || (t("success_generic") as string),
             });
         } catch {
-            setState({ status: "error", message: "Erreur réseau. Réessaie." });
+            setState({ status: "error", message: t("error_network") as string });
         }
     };
 
     return (
         <main className="mx-auto max-w-xl px-5 py-14">
             <div className="rounded-3xl bg-black/40 p-6 ring-1 ring-white/10 backdrop-blur">
-                <div className="text-2xl font-semibold text-white/90">Se désinscrire</div>
-                <div className="mt-2 text-sm text-white/65">
-                    Tu peux te retirer de la liste RPG Renaissance à tout moment.
-                </div>
+                <div className="text-2xl font-semibold text-white/90">{t("title")}</div>
+                <div className="mt-2 text-sm text-white/65">{t("lead")}</div>
 
                 {!token ? (
                     <div className="mt-5 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
-                        <div className="text-sm text-white/70">
-                            Oups, le lien de désinscription est incomplet.
-                        </div>
-                        <div className="mt-2 text-xs text-white/50">
-                            Reviens depuis le lien “Se désinscrire” dans l’email.
-                        </div>
+                        <div className="text-sm text-white/70">{t("missing_link_title")}</div>
+                        <div className="mt-2 text-xs text-white/50">{t("missing_link_hint")}</div>
                     </div>
                 ) : null}
 
@@ -126,15 +126,13 @@ export default function UnsubscribeClient(props: { token: string }) {
                         ].join(" ")}
                     >
                         {state.status === "loading"
-                            ? "⏳ Traitement…"
+                            ? (t("cta_processing") as string)
                             : state.status === "success"
-                            ? "✅ Désinscrit"
-                            : "Me désinscrire"}
+                            ? (t("cta_success") as string)
+                            : (t("cta_default") as string)}
                     </button>
 
-                    <div className="mt-3 text-xs text-white/45">
-                        Tu peux te réinscrire quand tu veux via la landing.
-                    </div>
+                    <div className="mt-3 text-xs text-white/45">{t("fineprint_resubscribe")}</div>
 
                     {state.status === "error" ? (
                         <div className="mt-4 rounded-2xl bg-rose-500/10 p-3 ring-1 ring-rose-500/25 text-sm text-rose-200">

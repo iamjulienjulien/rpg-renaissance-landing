@@ -1,16 +1,14 @@
-// src/app/unsubscribe/page.tsx
 import UnsubscribeClient from "./unsubscribe-client";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+import { getRequestLocale } from "@/components/I18n/getRequestLocale";
+import {
+    UNSUBSCRIBE_COPY,
+    type UnsubscribeLocale,
+    type UnsubscribeCopyKey,
+} from "./unsubscribe.copy";
 
-export const metadata: Metadata = {
-    title: "Désinscription",
-    robots: {
-        index: false,
-        follow: true,
-    },
-};
+export const dynamic = "force-dynamic";
 
 type SearchParamsValue = string | string[] | undefined;
 type SearchParamsShape = Record<string, SearchParamsValue>;
@@ -25,7 +23,19 @@ function pickFirst(v: SearchParamsValue): string | null {
     return null;
 }
 
+export async function generateMetadata(): Promise<Metadata> {
+    const locale = (await getRequestLocale()) as UnsubscribeLocale;
+    const t = <K extends UnsubscribeCopyKey>(key: K) => UNSUBSCRIBE_COPY[key][locale];
+
+    return {
+        title: t("meta_title"),
+        robots: { index: false, follow: true },
+    };
+}
+
 export default async function UnsubscribePage({ searchParams }: Props) {
+    const locale = (await getRequestLocale()) as UnsubscribeLocale;
+
     const sp =
         searchParams && typeof (searchParams as any)?.then === "function"
             ? await (searchParams as Promise<SearchParamsShape>)
@@ -33,5 +43,5 @@ export default async function UnsubscribePage({ searchParams }: Props) {
 
     const token = pickFirst(sp?.token)?.trim() ?? "";
 
-    return <UnsubscribeClient token={token} />;
+    return <UnsubscribeClient token={token} locale={locale} />;
 }

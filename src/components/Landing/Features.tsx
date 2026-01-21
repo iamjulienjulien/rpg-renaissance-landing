@@ -1,39 +1,20 @@
-// src/components/Landing/Features.tsx
 "use client";
+
 import { motion } from "framer-motion";
+import { FEATURES_COPY, type FeaturesLocale, type FeaturesCopyKey } from "./features.copy";
+import { useLocale } from "@/components/I18n/LocaleProvider";
 
 export default function Features() {
+    const locale = useLocale() as FeaturesLocale;
+    const t = <K extends FeaturesCopyKey>(key: K) => FEATURES_COPY[key][locale];
+
     const items = [
-        {
-            title: "Univers Renaissance",
-            desc: "Un imaginaire lumineux: transformation, reconstruction, puissance douce.",
-            icon: "👑",
-        },
-        {
-            title: "Mission du quotidien",
-            desc: "Transforme tes objectifs en missions jouables, avec étapes, récompenses et narration.",
-            icon: "📜",
-        },
-        {
-            title: "Système de progression",
-            desc: "Renommée, niveaux, badges. Ton avancement devient visible et motivant.",
-            icon: "🏆",
-        },
-        {
-            title: "Maître du jeu IA",
-            desc: "Un Maître du Jeu qui t’aide à clarifier, choisir, persister… sans te juger.",
-            icon: "🧙",
-        },
-        {
-            title: "Objets & rituels",
-            desc: "Des routines packagées en “objets” et “sorts” que tu peux équiper.",
-            icon: "🧰",
-        },
-        {
-            title: "Avatar narratif",
-            desc: "Génère un portrait fantasy à partir de tes photos, pour incarner ton run.",
-            icon: "🖼️",
-        },
+        { title: t("item_01_title"), desc: t("item_01_desc"), icon: "👑" },
+        { title: t("item_02_title"), desc: t("item_02_desc"), icon: "📜" },
+        { title: t("item_03_title"), desc: t("item_03_desc"), icon: "🏆" },
+        { title: t("item_04_title"), desc: t("item_04_desc"), icon: "🧙" },
+        { title: t("item_05_title"), desc: t("item_05_desc"), icon: "🧰" },
+        { title: t("item_06_title"), desc: t("item_06_desc"), icon: "🖼️" },
     ];
 
     return (
@@ -41,17 +22,12 @@ export default function Features() {
             <div className="flex items-end justify-between gap-4">
                 <div>
                     <h2 className="text-xs tracking-[0.22em] text-white/55 uppercase">
-                        Le concept
+                        {t("kicker")}
                     </h2>
-                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">
-                        Une app, un jeu, une montée en puissance
-                    </h3>
-                    <p className="mt-3 text-white/70 max-w-2xl">
-                        RPG Renaissance transforme ta progression personnelle en aventure: claire,
-                        épique, mesurable.
-                    </p>
+                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">{t("title")}</h3>
+                    <p className="mt-3 text-white/70 max-w-2xl">{t("lead")}</p>
                     <p className="mt-5 text-sm text-white/50 leading-relaxed max-w-xl">
-                        Pour celles et ceux qui veulent avancer sans se flageller.
+                        {t("sublead")}
                     </p>
                 </div>
             </div>

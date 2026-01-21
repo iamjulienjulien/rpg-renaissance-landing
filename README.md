@@ -1,6 +1,6 @@
 # 🧙‍♂️ RPG Renaissance — Landing
 
-> Une landing page comme un point de départ.  
+> Une landing page comme un seuil.  
 > Ici, on ne s’inscrit pas à une newsletter.  
 > On accepte une quête.
 
@@ -8,57 +8,83 @@
 
 ## 🌌 Le projet
 
-**RPG Renaissance** est une expérience hybride entre :
+**RPG Renaissance** est une expérience narrative et introspective qui détourne  
+les codes du jeu de rôle pour accompagner la reconstruction personnelle.
 
--   développement personnel
--   jeu de rôle narratif
--   exploration de soi
--   et outils numériques modernes
+Ce projet mêle :
 
-Cette landing page est la première porte du voyage.
+-   développement personnel sans injonction
+-   narration et symbolique RPG
+-   progression douce et mesurable
+-   outils numériques modernes, sobres et éthiques
 
-Elle permet :
-
--   de présenter l’univers
--   de capter les premiers aventuriers
--   de gérer une inscription éthique, RGPD-compliant et double opt-in
-
-Pas de dark patterns.  
-Pas de spam.  
-Juste une invitation claire.
+Cette landing page est le **prologue** du voyage.  
+Elle pose le cadre, le ton, et la relation avec l’utilisateur.
 
 ---
 
-## 🗺️ Ce que fait cette landing
+## 🗺️ Rôle de cette landing
 
--   ✨ Présentation de l’univers RPG Renaissance
--   📬 Inscription à la liste via double opt-in
--   🔐 Gestion propre du consentement (RGPD-first)
--   🧾 Historique des événements de consentement
--   🚪 Désinscription simple et respectée
--   📡 Synchronisation avec Resend (emails & contacts)
--   🛡️ Pensée pour la délivrabilité (SPF, DKIM, DMARC, BIMI-ready)
+La landing n’est pas marketing-first.  
+Elle est **relation-first**.
+
+Elle permet :
+
+-   ✨ de présenter l’univers RPG Renaissance
+-   🎭 d’installer une narration claire et honnête
+-   📬 de gérer une inscription volontaire via double opt-in
+-   🔐 de respecter strictement le RGPD (consentement traçable)
+-   🚪 de permettre une désinscription simple et immédiate
+-   🌍 de s’adapter automatiquement à la langue de l’utilisateur (i18n)
+
+Pas de dark patterns.  
+Pas de pression.  
+Pas de spam.
+
+Juste une invitation.
+
+---
+
+## 🌍 Internationalisation (i18n)
+
+La landing est entièrement **localisée FR / EN**.
+
+-   Détection automatique via :
+    -   paramètre `?lang=fr|en`
+    -   cookie
+    -   langue navigateur (fallback)
+-   Copy isolée par domaine (`hero.copy.ts`, `legal.copy.ts`, etc.)
+-   Metadata dynamiques (SEO / OpenGraph / Twitter)
+-   Propagation SSR → Client via `LocaleProvider`
 
 ---
 
 ## ⚙️ Stack technique
 
--   Next.js (App Router)
--   TypeScript
--   Supabase (PostgreSQL, admin, RLS)
--   Resend (emails transactionnels & contacts)
--   Vercel (déploiement)
+-   **Next.js** (App Router, Server Components)
+-   **TypeScript**
+-   **Supabase**
+    -   PostgreSQL
+    -   Row Level Security
+    -   Historique de consentement
+-   **Resend**
+    -   Emails transactionnels
+    -   Double opt-in
+    -   List-Unsubscribe compatible
+-   **Vercel**
+    -   Hébergement
+    -   Edge / ISR-ready
 
 ---
 
-## 🧠 Philosophie
+## 🧠 Philosophie technique
 
-Cette landing applique les mêmes règles que le projet qu’elle présente :
+Cette landing applique exactement les règles du projet qu’elle présente :
 
 -   🧭 L’utilisateur garde le contrôle
--   🧩 Les données ont un sens
+-   📜 Le consentement est explicite et traçable
 -   🔁 Les actions sont idempotentes
--   📜 Le consentement est traçable
+-   🔍 Les données ont un sens clair
 -   🎭 L’expérience prime sur l’optimisation brute
 
 > “Renaissance n’est pas un bouton.  
@@ -70,8 +96,10 @@ Cette landing applique les mêmes règles que le projet qu’elle présente :
 
 ## 🚀 Démarrage en local
 
-npm install  
+```bash
+npm install
 npm run dev
+```
 
 Puis ouvre 👉 http://localhost:3000
 
@@ -79,54 +107,61 @@ Puis ouvre 👉 http://localhost:3000
 
 ## 🔑 Variables d’environnement (extrait)
 
-NEXT_PUBLIC_SITE_URL=  
-RESEND_API_KEY=  
-RESEND_FROM_EMAIL=  
-RESEND_REPLY_TO=  
+```env
+NEXT_PUBLIC_SITE_URL=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
+RESEND_REPLY_TO=
 IP_HASH_SALT=
+```
 
-⚠️ Aucune clé sensible côté client.  
-Tout ce qui touche au consentement et à l’email passe côté serveur.
+⚠️
 
----
-
-## 🧪 Routes clés
-
--   POST /api/subscribe  
-    → inscription + double opt-in
-
--   GET /api/subscribe/confirm?token=...  
-    → confirmation d’inscription
-
--   POST /api/subscribe/unsubscribe  
-    → désinscription (List-Unsubscribe compatible)
+-   Aucune clé sensible côté client
+-   Tout ce qui touche au consentement et aux emails est traité **côté serveur**
 
 ---
 
-## 📦 État du projet
+## 🧪 Routes principales
 
--   [x] Landing fonctionnelle
--   [x] Emailing propre
--   [x] RGPD solide
--   [x] Base prête pour la suite
--   [ ] SEO avancé
--   [ ] OpenGraph & metadata finales
--   [ ] Analytics sobres
--   [ ] Robots / sitemap finalisés
--   [ ] Lancement public
+-   **POST /api/subscribe**  
+    → inscription + envoi du mail de confirmation
+
+-   **GET /api/subscribe/confirm?token=...**  
+    → validation du double opt-in
+
+-   **POST /api/subscribe/unsubscribe**  
+    → désinscription immédiate (List-Unsubscribe compatible)
+
+---
+
+## 📦 État actuel du projet
+
+-   [x] Landing complète et stable
+-   [x] Copywriting narratif isolé
+-   [x] i18n FR / EN
+-   [x] Metadata dynamiques (SEO / OG / Twitter)
+-   [x] Double opt-in RGPD
+-   [x] Désinscription propre
+-   [x] Analytics sobres (Plausible)
+-   [x] SEO avancé (search console, sitemap final)
+-   [x] Robots.txt final
+-   [x] Lancement public
 
 ---
 
 ## 🧙‍♀️ Et après ?
 
-Cette landing n’est qu’un prologue.
+Cette landing est un **prologue**, pas une finalité.
 
-La suite :
+La suite du projet RPG Renaissance :
 
 -   des aventures jouables
+-   des quêtes quotidiennes
 -   des archétypes
--   des rituels
--   un système de progression
--   et une application complète
+-   des rituels simples
+-   un système de progression narratif
+-   une application complète
 
-Bienvenue dans RPG Renaissance.
+Bienvenue dans RPG Renaissance.  
+Le jeu commence doucement.

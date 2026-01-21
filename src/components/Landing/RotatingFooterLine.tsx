@@ -1,22 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-
-const FOOTER_LINES = [
-    "Renaissance est un voyage, pas un bouton. (Même si on aime les boutons.)",
-    "Renaissance est un chemin, pas un raccourci. (Désolé.)",
-    "Renaissance ne règle pas ta vie. Elle t’aide à la traverser.",
-    "Ce n’est pas une todo-list. C’est une histoire.",
-    "Ici, les échecs donnent de l’XP.",
-    "Pas de game over. Juste des checkpoints.",
-    "Tu n’es pas en retard. Tu es en chemin.",
-    "Aucun coach n’a été maltraité pendant le développement.",
-    "Encore en alpha. Comme beaucoup de parcours humains.",
-    "Bugs connus: doutes, fatigue, résistance au changement.",
-    "Pas encore parfait. Et tant mieux.",
-];
+import React, { useEffect, useState } from "react";
+import { FOOTER_COPY, type FooterLocale } from "./footer.copy";
 
 type RotatingFooterLineProps = {
+    /** locale du footer */
+    locale?: FooterLocale;
     /** ms entre chaque phrase */
     intervalMs?: number;
     /** mélange l’ordre au chargement */
@@ -36,13 +25,22 @@ function shuffleArray<T>(arr: T[]) {
 }
 
 export function RotatingFooterLine(props: RotatingFooterLineProps) {
-    const { intervalMs = 6500, shuffle = false, startRandom = true, className } = props;
+    const {
+        locale = "en",
+        intervalMs = 6500,
+        shuffle = false,
+        startRandom = true,
+        className,
+    } = props;
+
+    const baseLines = (FOOTER_COPY.lines[locale] as string[]) ?? [""];
+    const safeBase = baseLines.length ? baseLines : [""];
 
     // ✅ SSR-safe: première peinture stable (pas de random / pas de shuffle)
     const [mounted, setMounted] = useState(false);
 
     // ✅ On fige la liste réelle dans un state, initialisé de façon déterministe
-    const [lines, setLines] = useState<string[]>(() => (FOOTER_LINES.length ? FOOTER_LINES : [""]));
+    const [lines, setLines] = useState<string[]>(() => safeBase);
 
     // ✅ Index déterministe au départ (0)
     const [idx, setIdx] = useState(0);
@@ -53,12 +51,24 @@ export function RotatingFooterLine(props: RotatingFooterLineProps) {
         setMounted(true);
     }, []);
 
+    // Si la locale change, on remet une base déterministe SSR-safe, puis on re-randomize après mount
+    useEffect(() => {
+        const nextBase = (FOOTER_COPY.lines[locale] as string[]) ?? [""];
+        setLines(nextBase.length ? nextBase : [""]);
+        setIdx(0);
+        setVisible(true);
+    }, [locale]);
+
     // Après mount: on applique shuffle + startRandom (client-only)
     useEffect(() => {
         if (!mounted) return;
 
-        const base = FOOTER_LINES.length ? FOOTER_LINES : [""];
-        const nextLines = shuffle ? shuffleArray(base) : base;
+        const base = (FOOTER_COPY.lines[locale] as string[]) ?? [""];
+        const nextLines = shuffle
+            ? shuffleArray(base.length ? base : [""])
+            : base.length
+            ? base
+            : [""];
 
         setLines(nextLines);
 
@@ -67,7 +77,7 @@ export function RotatingFooterLine(props: RotatingFooterLineProps) {
         } else {
             setIdx(0);
         }
-    }, [mounted, shuffle, startRandom]);
+    }, [mounted, shuffle, startRandom, locale]);
 
     // Rotation
     useEffect(() => {

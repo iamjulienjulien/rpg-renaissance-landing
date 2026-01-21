@@ -1,12 +1,7 @@
-// src/app/legal/page.tsx
 import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-    title: "Mentions légales",
-    description: "Mentions légales du site RPG Renaissance.",
-    alternates: { canonical: "/legal" },
-    robots: { index: true, follow: true },
-};
+import React from "react";
+import { getRequestLocale } from "@/components/I18n/getRequestLocale";
+import { LEGAL_COPY, type LegalLocale, type LegalCopyKey } from "./legal.copy";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -17,47 +12,64 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     );
 }
 
-export default function LegalPage() {
+export async function generateMetadata(): Promise<Metadata> {
+    const locale = (await getRequestLocale()) as LegalLocale;
+    const t = <K extends LegalCopyKey>(key: K) => LEGAL_COPY[key][locale];
+
+    return {
+        title: t("meta_title"),
+        description: t("meta_description"),
+        alternates: { canonical: "/legal" },
+        robots: { index: true, follow: true },
+    };
+}
+
+export default async function LegalPage() {
+    const locale = (await getRequestLocale()) as LegalLocale;
+    const t = <K extends LegalCopyKey>(key: K) => LEGAL_COPY[key][locale];
+
     return (
         <main className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
             <header className="mb-10 space-y-3">
-                <p className="text-xs tracking-[0.22em] text-white/55 uppercase">Informations</p>
+                <p className="text-xs tracking-[0.22em] text-white/55 uppercase">{t("kicker")}</p>
+
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                    Mentions légales
+                    {t("page_title")}
                 </h1>
+
                 <p className="text-sm text-white/60">
-                    Dernière mise à jour : <b>13/01/2026</b>
+                    {t("last_update_label")} <b>{t("last_update_date")}</b>
                 </p>
             </header>
 
             <div className="space-y-4">
-                <Section title="Éditeur du site">
+                <Section title={t("section_publisher_title")}>
                     <p>
-                        Le présent site <b>RPG Renaissance</b> est édité par un particulier.
+                        {t("publisher_intro").replace("RPG Renaissance", "")}
+                        <b>RPG Renaissance</b>.
                     </p>
+
                     <ul className="list-disc pl-5 space-y-1">
                         <li>
-                            Nom : <b>Julien Julien</b>
+                            {t("publisher_list_name_label")} <b>Julien Julien</b>
                         </li>
                         <li>
-                            Contact :{" "}
+                            {t("publisher_list_contact_label")}{" "}
                             <a className="underline" href="mailto:hello@rpg-renaissance.com">
                                 hello@rpg-renaissance.com
                             </a>
                         </li>
                         <li>
-                            Statut : <b>Particulier (sans statut juridique à ce jour)</b>
+                            {t("publisher_list_status_label")}{" "}
+                            <b>Particulier (sans statut juridique à ce jour)</b>
                         </li>
                     </ul>
-                    <p className="text-xs text-white/50">
-                        Conformément à l’article 6, III-2 de la LCEN, les informations d’identité
-                        complètes peuvent être communiquées aux autorités compétentes sur
-                        réquisition.
-                    </p>
+
+                    <p className="text-xs text-white/50">{t("publisher_law_note")}</p>
                 </Section>
 
-                <Section title="Hébergement">
-                    <p>Site hébergé par :</p>
+                <Section title={t("section_hosting_title")}>
+                    <p>{t("hosting_intro")}</p>
                     <address className="mb-4">
                         <strong>Vercel Inc.</strong>
                         <br />
@@ -74,32 +86,21 @@ export default function LegalPage() {
                             https://vercel.com
                         </a>
                     </address>
-                    <p>Les détails exacts peuvent évoluer au fil de la mise en production.</p>
+                    <p>{t("hosting_note")}</p>
                 </Section>
 
-                <Section title="Propriété intellectuelle">
-                    <p>
-                        L’ensemble des contenus présents sur ce site (textes, visuels, logos,
-                        éléments graphiques, code, etc.) sont protégés par le droit d’auteur et
-                        restent la propriété de leur auteur, sauf mention contraire.
-                    </p>
-                    <p>
-                        Toute reproduction, représentation, modification ou exploitation non
-                        autorisée est interdite.
-                    </p>
+                <Section title={t("section_ip_title")}>
+                    <p>{t("ip_p1")}</p>
+                    <p>{t("ip_p2")}</p>
                 </Section>
 
-                <Section title="Responsabilité">
-                    <p>
-                        Les informations et contenus proposés sur ce site sont fournis à titre
-                        informatif. Malgré le soin apporté, l’éditeur ne peut garantir l’absence
-                        d’erreurs ou d’omissions.
-                    </p>
-                    <p>L’utilisation du site se fait sous la responsabilité de l’utilisateur.</p>
+                <Section title={t("section_liability_title")}>
+                    <p>{t("liability_p1")}</p>
+                    <p>{t("liability_p2")}</p>
                 </Section>
 
                 <div className="pt-6 text-xs text-white/50">
-                    Besoin d’un point de contact ?{" "}
+                    {t("footer_contact_question")}{" "}
                     <a className="underline" href="mailto:hello@rpg-renaissance.com">
                         hello@rpg-renaissance.com
                     </a>

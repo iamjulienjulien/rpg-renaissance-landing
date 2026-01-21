@@ -1,33 +1,33 @@
-// src/components/Landing/Roadmap.tsx
 "use client";
+
 import { motion } from "framer-motion";
+import { ROADMAP_COPY, type RoadmapLocale, type RoadmapCopyKey } from "./roadmap.copy";
+import { useLocale } from "@/components/I18n/LocaleProvider";
 
 export default function Roadmap() {
+    const locale = useLocale() as RoadmapLocale;
+    const t = <K extends RoadmapCopyKey>(key: K) => ROADMAP_COPY[key][locale];
+
     const steps = [
         {
-            title: "Prologue",
-            desc: "Ouverture de la liste d’attente et premières démos (à venir).",
-            badge: "✅ En cours",
+            title: t("step_01_title"),
+            desc: t("step_01_desc"),
+            badge: t("step_01_badge"),
         },
         {
-            title: "Alpha fermée",
-            desc: "Démos du système de quêtes, avec progression et journal.",
-            badge: "⏳ Cet hiver",
-        },
-        // {
-        //   title: "Avatars",
-        //   desc: "Génération d’avatars & sélection en jeu.",
-        //   badge: "🧪 itération",
-        // },
-        {
-            title: "Beta",
-            desc: "Première aventure complète : chapitres, quêtes, récompenses, narration.",
-            badge: "🛠️ Printemps 2026",
+            title: t("step_02_title"),
+            desc: t("step_02_desc"),
+            badge: t("step_02_badge"),
         },
         {
-            title: "Lancement",
-            desc: "Une saison, des chapitres, une renaissance collective.",
-            badge: "🔥 Été 2026",
+            title: t("step_03_title"),
+            desc: t("step_03_desc"),
+            badge: t("step_03_badge"),
+        },
+        {
+            title: t("step_04_title"),
+            desc: t("step_04_desc"),
+            badge: t("step_04_badge"),
         },
     ];
 
@@ -36,14 +36,15 @@ export default function Roadmap() {
             <section className="mx-auto max-w-6xl px-6 pb-15 sm:pb-15">
                 <div className="rounded-[40px] bg-black/25 ring-1 ring-white/10 p-8 sm:p-10">
                     <h2 className="text-xs tracking-[0.22em] text-white/55 uppercase">
-                        La Roadmap
+                        {t("kicker")}
                     </h2>
-                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">Les prochains chapitres</h3>
-                    <p className="mt-3 text-white/70 max-w-2xl">
-                        Une progression en étapes, comme une campagne: simple, lisible, solide.
-                    </p>
+
+                    <h3 className="mt-2 text-2xl sm:text-3xl font-bold">{t("title")}</h3>
+
+                    <p className="mt-3 text-white/70 max-w-2xl">{t("lead")}</p>
+
                     <p className="mt-5 text-sm text-white/50 leading-relaxed max-w-xl">
-                        RPG Renaissance se construit comme une campagne : chapitre par chapitre.
+                        {t("sublead")}
                     </p>
 
                     <div className="mt-8 grid gap-3">
@@ -67,14 +68,12 @@ export default function Roadmap() {
                         ))}
                     </div>
 
-                    <div className="mt-8 text-xs text-white/50">
-                        Tu veux participer aux premiers tests? Inscris-toi, et je te ping quand ça
-                        ouvre. 📨
-                    </div>
+                    <div className="mt-8 text-xs text-white/50">{t("fineprint_invite_tests")}</div>
                 </div>
             </section>
+
             <p className="text-center text-sm text-white/50 leading-relaxed mb-15">
-                Tu n’as rien à réussir ici. Juste à jouer honnêtement 🤝
+                {t("closing_line")}
             </p>
         </div>
     );
