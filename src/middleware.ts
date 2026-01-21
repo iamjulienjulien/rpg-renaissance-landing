@@ -45,10 +45,6 @@ export function middleware(req: NextRequest) {
     // 3) navigateur (Accept-Language)
     const fromHeader = detectFromAcceptLanguage(req.headers.get("accept-language"));
 
-    console.log("fromQuery", fromQuery);
-    console.log("fromCookie", fromCookie);
-    console.log("fromHeader", fromHeader);
-
     const locale: Locale = fromQuery ?? fromCookie ?? fromHeader ?? "en";
 
     // Option A (simple): on stocke en cookie et on propage en header pour le layout

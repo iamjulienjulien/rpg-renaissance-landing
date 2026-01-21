@@ -4,6 +4,7 @@ import { subscribeSchema } from "@/lib/subscribeSchema";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import crypto from "node:crypto";
 import { Resend } from "resend";
+import { CONFIRM_EMAIL_COPY, type ConfirmEmailLocale } from "./confirm-email.copy";
 
 /* ============================================================================
 HELPERS
@@ -84,6 +85,37 @@ function buildSiteUrl(origin: string | null) {
         return u.toString().replace(/\/$/, "");
     } catch {
         return "http://localhost:3000";
+    }
+}
+
+// helper à ajouter dans route.ts (près des autres helpers)
+function pickLocale(args: { referrer: string | null; acceptLanguage: string | null }): "fr" | "en" {
+    // 1) ?lang=xx dans l’URL de provenance
+    if (args.referrer) {
+        try {
+            const u = new URL(args.referrer);
+            const qp = (u.searchParams.get("lang") ?? "").toLowerCase();
+            if (qp === "fr" || qp === "en") return qp;
+        } catch {}
+    }
+
+    // 2) Accept-Language
+    const al = (args.acceptLanguage ?? "").toLowerCase();
+    if (al.startsWith("fr")) return "fr";
+    if (al.startsWith("en")) return "en";
+
+    return "en";
+}
+
+function withLang(url: string, locale: "fr" | "en") {
+    try {
+        const u = new URL(url);
+        u.searchParams.set("lang", locale);
+        return u.toString();
+    } catch {
+        // fallback ultra safe (au cas où)
+        const sep = url.includes("?") ? "&" : "?";
+        return `${url}${sep}lang=${locale}`;
     }
 }
 
@@ -174,6 +206,7 @@ async function sendDoubleOptInEmail(args: {
     email: string;
     confirmUrl: string;
     unsubscribeUrl: string;
+    locale: ConfirmEmailLocale;
 }) {
     const apiKey = safeTrim(process.env.RESEND_API_KEY);
     if (!apiKey) throw new Error("Missing env: RESEND_API_KEY");
@@ -183,10 +216,11 @@ async function sendDoubleOptInEmail(args: {
 
     const replyTo = safeTrim(process.env.RESEND_REPLY_TO) || undefined;
 
-    // Sujet sobre
-    const subject = "Confirme ton inscription à RPG Renaissance ✨";
+    const t = <K extends keyof typeof CONFIRM_EMAIL_COPY>(key: K) =>
+        CONFIRM_EMAIL_COPY[key][args.locale];
 
-    const preheader = "Dernière étape: confirme ton adresse email pour rejoindre la liste.";
+    const subject = t("subject");
+    const preheader = t("preheader");
 
     const html = `
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
@@ -196,23 +230,22 @@ async function sendDoubleOptInEmail(args: {
 <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#0b0f1a; color:#ffffff; padding:24px; border-radius:14px;">
   <div style="max-width:560px;margin:0 auto;">
     <h1 style="margin:0 0 10px; font-size:20px; font-weight:700;">
-      Confirme ton email
+      ${t("title")}
     </h1>
 
     <p style="margin:0 0 14px; color:rgba(255,255,255,0.82); line-height:1.6;">
-      Tu as demandé à rejoindre la liste <strong>RPG Renaissance</strong>.
-      Pour finaliser l’inscription (double opt-in), confirme ton adresse en cliquant ci-dessous.
+      ${t("p1_before_brand")}<strong>RPG Renaissance</strong>${t("p1_after_brand")}
     </p>
 
     <div style="margin:18px 0 16px;">
       <a href="${args.confirmUrl}"
          style="display:inline-block;background:#ffffff;color:#0b0f1a;text-decoration:none;font-weight:700;padding:12px 16px;border-radius:12px;">
-        Confirmer mon email
+        ${t("cta_confirm")}
       </a>
     </div>
 
     <p style="margin:0 0 10px; color:rgba(255,255,255,0.62); font-size:12px; line-height:1.5;">
-      Si le bouton ne fonctionne pas, copie-colle ce lien:
+      ${t("fallback_link")}
       <br/>
       <span style="word-break:break-all;color:rgba(255,255,255,0.78);">${args.confirmUrl}</span>
     </p>
@@ -220,11 +253,13 @@ async function sendDoubleOptInEmail(args: {
     <hr style="border:none;border-top:1px solid rgba(255,255,255,0.10); margin:18px 0;" />
 
     <p style="margin:0; color:rgba(255,255,255,0.50); font-size:12px; line-height:1.6;">
-      Si tu n’es pas à l’origine de cette demande, ignore simplement cet email.
+      ${t("footer_ignore")}
       <br/>
       <span style="color:rgba(255,255,255,0.45);">
-        Se désinscrire:
-        <a href="${args.unsubscribeUrl}" style="color:rgba(255,255,255,0.75); text-decoration:underline;">
+        ${t("footer_unsubscribe_label")}
+        <a href="${
+            args.unsubscribeUrl
+        }" style="color:rgba(255,255,255,0.75); text-decoration:underline;">
           ${args.unsubscribeUrl}
         </a>
       </span>
@@ -234,22 +269,19 @@ async function sendDoubleOptInEmail(args: {
 `.trim();
 
     const text = `
-CONFIRME TON EMAIL (RPG Renaissance)
+${t("text_title")}
 
-Tu as demandé à rejoindre la liste RPG Renaissance.
-Pour finaliser l’inscription (double opt-in), ouvre ce lien :
+${t("text_p1")}
 
 ${args.confirmUrl}
 
-Si tu n’es pas à l’origine de cette demande, ignore cet email.
+${t("text_ignore")}
 
-Se désinscrire :
+${t("text_unsub")}
 ${args.unsubscribeUrl}
 `.trim();
 
     const resend = new Resend(apiKey);
-
-    // anti-threading Gmail (Resend example)
     const entityRefId = crypto.randomUUID();
 
     const { error } = await resend.emails.send({
@@ -261,11 +293,7 @@ ${args.unsubscribeUrl}
         replyTo,
         headers: {
             "X-Entity-Ref-ID": entityRefId,
-            // List-Unsubscribe doit être entre chevrons, et idéalement une URL HTTPS
             "List-Unsubscribe": `<${args.unsubscribeUrl}>`,
-
-            // optionnel (Gmail one-click). On le met déjà, ça ne casse rien.
-            // Si tu veux rester strict sur ta demande, tu peux le retirer.
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         },
     });
@@ -468,11 +496,26 @@ export async function POST(req: Request) {
         });
 
         // 4) Send email (Resend)
-        const confirmUrl = `${siteUrl}/subscribe/confirm?token=${rawToken}`;
-        const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${rawUnsubToken}`;
-
         try {
-            await sendDoubleOptInEmail({ email, confirmUrl, unsubscribeUrl });
+            const acceptLanguage = headers.get("accept-language");
+            const emailLocale = pickLocale({ referrer, acceptLanguage });
+
+            const confirmUrl = withLang(
+                `${siteUrl}/subscribe/confirm?token=${encodeURIComponent(rawToken)}`,
+                emailLocale
+            );
+
+            const unsubscribeUrl = withLang(
+                `${siteUrl}/unsubscribe?token=${encodeURIComponent(rawUnsubToken)}`,
+                emailLocale
+            );
+
+            await sendDoubleOptInEmail({
+                email,
+                confirmUrl,
+                unsubscribeUrl,
+                locale: emailLocale,
+            });
         } catch (e) {
             return jsonError(e instanceof Error ? e.message : "Email send failed", 500);
         }
