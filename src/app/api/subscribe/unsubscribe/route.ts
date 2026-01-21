@@ -5,6 +5,28 @@ import crypto from "node:crypto";
 import { Resend } from "resend";
 
 /* ============================================================================
+I18N (server)
+============================================================================ */
+
+type ApiLocale = "fr" | "en";
+
+function getReqLocale(req: Request): ApiLocale {
+    const raw = (req.headers.get("x-locale") || "").toLowerCase();
+    return raw === "fr" ? "fr" : "en"; // fallback en
+}
+
+const MESSAGES: Record<ApiLocale, { neutral: string; success: string }> = {
+    fr: {
+        neutral: "Si l’adresse existe, elle sera désinscrite.",
+        success: "Tu es bien désinscrit. Merci d’avoir voyagé avec nous 🧭",
+    },
+    en: {
+        neutral: "If the address exists, it will be unsubscribed.",
+        success: "You’ve been unsubscribed. Thanks for traveling with us 🧭",
+    },
+};
+
+/* ============================================================================
 HELPERS
 ============================================================================ */
 
@@ -62,23 +84,26 @@ Body: { token: string }
 ============================================================================ */
 
 export async function POST(req: Request) {
+    const locale = getReqLocale(req);
+    const msg = MESSAGES[locale];
+
     let body: any;
     try {
         body = await req.json();
     } catch {
-        return json({ ok: true, message: "Si l’adresse existe, elle sera désinscrite." }, 200);
+        // Réponse neutre (anti-enumeration), localisée
+        return json({ ok: true, message: msg.neutral }, 200);
     }
 
     const token = safeTrim(body?.token);
     if (!token) {
-        return json({ ok: true, message: "Si l’adresse existe, elle sera désinscrite." }, 200);
+        return json({ ok: true, message: msg.neutral }, 200);
     }
 
     const token_hash = sha256(token);
     const supabase = supabaseAdmin();
 
     try {
-        // 1) Lookup unsubscribe token
         const { data: tok, error: tokErr } = await supabase
             .from("newsletter_optin_tokens")
             .select("id,subscriber_id,expires_at,confirmed_at,revoked_at,purpose")
@@ -86,23 +111,22 @@ export async function POST(req: Request) {
             .eq("purpose", "unsubscribe")
             .maybeSingle();
 
-        // Réponse neutre (anti-enumeration)
+        // Toujours neutre si doute / pas trouvé / invalide
         if (tokErr || !tok?.id) {
-            return json({ ok: true, message: "Si l’adresse existe, elle sera désinscrite." }, 200);
+            return json({ ok: true, message: msg.neutral }, 200);
         }
 
         if (tok.revoked_at) {
-            return json({ ok: true, message: "Si l’adresse existe, elle sera désinscrite." }, 200);
+            return json({ ok: true, message: msg.neutral }, 200);
         }
 
         const expiresAt = tok.expires_at ? new Date(tok.expires_at).getTime() : 0;
         if (!expiresAt || Date.now() > expiresAt) {
-            return json({ ok: true, message: "Si l’adresse existe, elle sera désinscrite." }, 200);
+            return json({ ok: true, message: msg.neutral }, 200);
         }
 
         const nowIso = new Date().toISOString();
 
-        // 2) Mark token as used (idempotent)
         if (!tok.confirmed_at) {
             await supabase
                 .from("newsletter_optin_tokens")
@@ -110,16 +134,11 @@ export async function POST(req: Request) {
                 .eq("id", tok.id);
         }
 
-        // 3) Update subscriber
         await supabase
             .from("newsletter_subscribers")
-            .update({
-                status: "unsubscribed",
-                unsubscribed_at: nowIso,
-            })
+            .update({ status: "unsubscribed", unsubscribed_at: nowIso })
             .eq("id", tok.subscriber_id);
 
-        // 3bis) Sync Resend (best-effort)
         try {
             const { data: sub } = await supabase
                 .from("newsletter_subscribers")
@@ -134,11 +153,9 @@ export async function POST(req: Request) {
                 });
             }
         } catch (e) {
-            // On ne bloque jamais la désinscription
             console.error("[resend] unsubscribe sync failed", e);
         }
 
-        // 4) RGPD event
         await supabase.from("newsletter_consent_events").insert({
             subscriber_id: tok.subscriber_id,
             event_type: "unsubscribe",
@@ -147,12 +164,9 @@ export async function POST(req: Request) {
             privacy_policy_version: "2026-01-11",
         });
 
-        return json(
-            { ok: true, message: "Tu es bien désinscrit. Merci d’avoir voyagé avec nous 🧭" },
-            200
-        );
+        // Success localisé
+        return json({ ok: true, message: msg.success }, 200);
     } catch {
-        // Toujours réponse neutre
-        return json({ ok: true, message: "Si l’adresse existe, elle sera désinscrite." }, 200);
+        return json({ ok: true, message: msg.neutral }, 200);
     }
 }

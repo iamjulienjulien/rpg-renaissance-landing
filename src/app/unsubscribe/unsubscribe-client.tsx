@@ -34,7 +34,10 @@ export default function UnsubscribeClient(props: { token: string; locale: Unsubs
             try {
                 const r = await fetch("/api/subscribe/unsubscribe", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-locale": locale,
+                    },
                     body: JSON.stringify({ token }),
                 });
 
@@ -76,7 +79,10 @@ export default function UnsubscribeClient(props: { token: string; locale: Unsubs
         try {
             const r = await fetch("/api/subscribe/unsubscribe", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-locale": locale,
+                },
                 body: JSON.stringify({ token }),
             });
             const j = (await r.json().catch(() => null)) as any;
